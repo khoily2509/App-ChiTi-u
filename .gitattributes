@@ -1,0 +1,10 @@
+# Chuẩn hoá xuống dòng: LF trong repo, tuỳ hệ điều hành khi checkout.
+# Không có dòng này thì mỗi commit trên Windows đều cảnh báo LF→CRLF.
+* text=auto eol=lf
+
+# File nhị phân — không đụng vào
+*.png   binary
+*.jpg   binary
+*.woff  binary
+*.woff2 binary
+*.ico   binary

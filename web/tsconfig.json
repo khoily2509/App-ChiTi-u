@@ -1,0 +1,37 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "useDefineForClassFields": true,
+
+    /* Nghiêm ngặt — đây là app tiền bạc, để trình biên dịch bắt lỗi hộ.
+       noUncheckedIndexedAccess đặc biệt quan trọng: arr[i] có kiểu T | undefined,
+       chặn được cả một lớp bug "đọc phần tử không tồn tại rồi tính toán trên undefined". */
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noImplicitOverride": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "exactOptionalPropertyTypes": true,
+
+    "verbatimModuleSyntax": true,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "skipLibCheck": true,
+    "noEmit": true,
+    "resolveJsonModule": true,
+
+    /* 'node' cần cho vite.config.ts (dùng node:url). Giữ một tsconfig duy nhất
+       thay vì tách tsconfig.node.json — bớt một khái niệm cho người mới học (§5). */
+    "types": ["vite/client", "node"],
+    /* TypeScript 7 đã bỏ 'baseUrl' — đường dẫn trong 'paths' phải tương đối ('./'). */
+    "paths": {
+      "@/*": ["./src/*"]
+    }
+  },
+  "include": ["src", "vite.config.ts"]
+}

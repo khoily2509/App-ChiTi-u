@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!--
+    ICON APP — bông cúc trắng trên nền lá.
+
+    Chọn hoa cúc chứ không phải ví, đồng xu hay biểu đồ: §9.2 chốt ẩn dụ xuyên
+    suốt của app là "ghi chép = hoa nở", và bồ nhìn icon này mỗi ngày. Một cái ví
+    nói "app tiền bạc"; bông hoa nói "chăm sóc" — đúng thứ §1 muốn bồ cảm thấy.
+
+    Bảy cánh khớp bảy ngày trong tuần, nhuỵ vàng khớp lúc hoa nở đủ.
+
+    Màu lấy từ §11.1: nền là slot 1 (#3b8841), nhuỵ là vàng đồng của mockup.
+    Hoa chiếm ~54% khung để nằm trọn trong vùng an toàn của icon maskable
+    (Android cắt tròn, iOS bo góc — phần rìa có thể bị mất).
+  -->
+  <rect width="512" height="512" fill="#3b8841" />
+
+  <g transform="translate(256 256)">
+    <!-- 7 cánh, cách nhau 360/7 = 51,43° -->
+    <g fill="#faf7f2">
+      <ellipse cx="0" cy="-84" rx="40" ry="82" />
+      <ellipse cx="0" cy="-84" rx="40" ry="82" transform="rotate(51.43)" />
+      <ellipse cx="0" cy="-84" rx="40" ry="82" transform="rotate(102.86)" />
+      <ellipse cx="0" cy="-84" rx="40" ry="82" transform="rotate(154.29)" />
+      <ellipse cx="0" cy="-84" rx="40" ry="82" transform="rotate(205.71)" />
+      <ellipse cx="0" cy="-84" rx="40" ry="82" transform="rotate(257.14)" />
+      <ellipse cx="0" cy="-84" rx="40" ry="82" transform="rotate(308.57)" />
+    </g>
+    <circle r="54" fill="#e8c34a" />
+    <circle r="54" fill="none" stroke="#c9a227" stroke-width="6" />
+  </g>
+</svg>

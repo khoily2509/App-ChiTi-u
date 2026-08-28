@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- viewport-fit=cover: cần cho iPhone có tai thỏ, để nav dưới không bị home indicator đè -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#f2ede3" />
+    <title>Sổ của Bồ</title>
+
+    <!-- ── PWA ────────────────────────────────────────────────────────────────
+      Manifest lo phần Android và trình duyệt máy tính. iOS Safari thì gần như
+      BỎ QUA manifest cho việc cài lên màn hình chính: nó đọc mấy thẻ apple-*
+      dưới đây. Thiếu chúng thì icon ra ảnh chụp màn hình mờ và tên ra URL —
+      mà bồ dùng iPhone (H1), nên đây mới là phần quan trọng.
+    -->
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="icon" type="image/svg+xml" href="/icon.svg" />
+
+    <!-- Chạy toàn màn hình, không còn thanh địa chỉ Safari -->
+    <!-- Giữ CẢ HAI thẻ. Bản chuẩn là mobile-web-app-capable, và Chrome đã kêu
+         thẻ apple là lỗi thời; nhưng Safari trên iOS vẫn chỉ đọc thẻ apple, mà
+         iPhone mới là máy bồ dùng. Bỏ thẻ apple đi là app mở ra kèm thanh địa
+         chỉ Safari — hết cảm giác app riêng. -->
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <!-- Tên dưới icon. Không có thẻ này thì iOS lấy <title>, mà title thì đổi được -->
+    <meta name="apple-mobile-web-app-title" content="Sổ của Bồ" />
+    <!-- default = chữ đen, hợp nền cát ấm §11.1 và cả ba nền bầu trời sáng -->
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

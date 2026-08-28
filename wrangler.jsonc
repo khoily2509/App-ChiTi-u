@@ -1,0 +1,58 @@
+{
+  // Cấu hình triển khai Cloudflare.
+  //
+  // Để trong repo chứ không khai trong giao diện web: cấu hình nằm cạnh code thì
+  // đọc được, sửa được qua pull request, và không ai phải nhớ mình đã bấm gì
+  // trên dashboard sáu tháng trước.
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "app-chi-tieu",
+  "compatibility_date": "2026-08-24",
+
+  // Worker này phục vụ file tĩnh VÀ chạy một lịch cron (§12 WEEK_FLOWER_NUDGE).
+  "main": "worker/index.ts",
+
+  "assets": {
+    // Vite build vào web/dist. Root repo là "/" nên phải trỏ cả đường dẫn con.
+    "directory": "./web/dist",
+
+    // App là một trang duy nhất, điều hướng bằng state chứ không bằng URL. Không
+    // có dòng này thì mở thẳng bất kỳ đường dẫn nào khác "/" sẽ ra 404 — kể cả
+    // link đăng nhập Supabase gửi về, vốn có đuôi hash phía sau.
+    "not_found_handling": "single-page-application",
+
+    // Có `main` thì request KHÔNG khớp file tĩnh sẽ rơi vào Worker thay vì được
+    // xử lý theo `not_found_handling`. Khai binding để Worker tự trả file về —
+    // thiếu nó là mọi đường dẫn con hỏng ngay khi thêm cron.
+    "binding": "ASSETS"
+  },
+
+  "triggers": {
+    // MỖI GIỜ, không phải mỗi ngày. §14 quy ước 2 bắt khai cron bằng UTC, mà bồ
+    // đổi được giờ nhắc — chạy hằng giờ rồi tự lọc theo giờ Việt Nam là cách duy
+    // nhất tôn trọng cả hai. Cắm cứng một mốc UTC thì đổi giờ nhắc vô tác dụng.
+    "crons": ["0 * * * *"]
+  },
+
+  // ⚠️ Khối này THAY THẾ toàn bộ biến Text trên dashboard mỗi lần deploy — biến
+  // nào điền tay trên dashboard mà không có mặt ở đây sẽ bị xoá sạch ở lần deploy
+  // kế tiếp. Secret thì không dính, chúng quản lý riêng.
+  //
+  // Nên MỌI biến Text worker cần đều phải khai ở đây. Đã suýt vấp: SUPABASE_URL
+  // điền tay trên dashboard 27/08/2026, nếu để vậy thì lần deploy sau cron sẽ gọi
+  // fetch(undefined + "/rest/v1/...") và hỏng IM LẶNG — không lỗi nào hiện ra,
+  // chỉ là mãi không có lời nhắc nào được gửi.
+  "vars": {
+    // Cả hai đều CÔNG KHAI ĐƯỢC nên nằm trong repo là đúng chỗ, không phải sơ ý:
+    // khoá công khai VAPID thì trình duyệt cần để đăng ký nhận thông báo, còn địa
+    // chỉ Supabase thì vốn đã nằm sẵn trong bundle ai tải trang cũng thấy.
+    // Thứ bảo vệ dữ liệu là RLS, không phải giấu hai giá trị này (§5).
+    "VAPID_CONG_KHAI": "BOCzI3mUgF3ek4bcTX_Tl9PgPdttk-dkaWnu3vlX_zkZxq5WVYbymfWzMlzKnh8kbKX8do6bqMeyijLM56QdFGk",
+    "SUPABASE_URL": "https://alzrcduspyvbqxuuitej.supabase.co"
+  },
+
+  "observability": {
+    // Bật log: cron hỏng thì im lặng, không ai biết cho tới lúc nhận ra cả tháng
+    // rồi không có lời nhắc nào.
+    "enabled": true
+  }
+}

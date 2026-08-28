@@ -1,0 +1,46 @@
+# HEADER BẢO MẬT — Cloudflare đọc file này ở TẦNG ASSETS.
+#
+# Lúc đầu tôi gắn header trong `worker/index.ts` và nó không có tác dụng gì:
+# request khớp file tĩnh được phục vụ thẳng từ tầng assets, KHÔNG đi qua Worker.
+# Hàm `fetch` chỉ chạy với request không khớp file nào. Deploy xanh, header vẫn
+# 0/7, và chỉ đo trên bản chạy thật mới thấy.
+#
+# Đặt ở đây thì đúng chỗ và còn rẻ hơn: không tốn một lượt gọi Worker nào.
+# Vite tự chép `public/` sang `dist/` nên file này đi theo bản build.
+
+# ── Cache ───────────────────────────────────────────────────────────────────
+#
+# Đo ngày 27/08/2026: MỌI tài sản đều trả `max-age=0, must-revalidate`, kể cả
+# file có mã băm trong tên. Nghĩa là mỗi lần bồ mở app, trình duyệt phải hỏi lại
+# máy chủ TỪNG FILE — 1 JS + 1 CSS + 7 font = 9 lượt đi về chỉ để nghe "chưa
+# đổi". Trên 4G đó là phần lớn quãng chờ.
+#
+# Tên file đã chứa mã băm nội dung (`index-C5941zf9.js`), nên nội dung ứng với
+# một tên là BẤT BIẾN — đổi nội dung thì Vite sinh tên khác. Cache vĩnh viễn ở
+# đây không có rủi ro tải phải bản cũ; `immutable` còn nói thẳng cho trình duyệt
+# biết đừng hỏi lại kể cả khi người dùng bấm tải lại trang.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Font cũng bất biến, nhưng tên KHÔNG có mã băm nên để một năm mà không
+# `immutable`: lỡ có ngày thay bộ font, còn đường bảo trình duyệt hỏi lại.
+/fonts/*
+  Cache-Control: public, max-age=31536000
+
+# Ba file dưới đây phải LUÔN hỏi lại — chúng là thứ trỏ tới mọi thứ khác. Cache
+# `index.html` là cách chắc nhất để bồ mắc kẹt ở bản cũ sau mỗi lần deploy.
+/index.html
+  Cache-Control: public, max-age=0, must-revalidate
+/sw.js
+  Cache-Control: public, max-age=0, must-revalidate
+/manifest.webmanifest
+  Cache-Control: public, max-age=0, must-revalidate
+
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob:; connect-src 'self' https://*.supabase.co wss://*.supabase.co; manifest-src 'self'; worker-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'
+  Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
+  Cross-Origin-Opener-Policy: same-origin

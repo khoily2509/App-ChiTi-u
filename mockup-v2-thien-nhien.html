@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>sobo v2 — Hướng thị giác thiên nhiên</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Nunito:wght@400;600;700;800&family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Lexend:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* ---- LỚP 1 · GIAO DIỆN (thiên nhiên, chill, không mang dữ liệu) ---- */
+  --page:#f2ede3;        /* cát ấm  */
+  --surface:#faf7f2;     /* kem     */
+  --surface2:#f6f1e8;
+  --ink:#20241f;         /* than ấm ngả olive */
+  --ink2:#5b6157;
+  --muted:#8d9186;
+  --line:#e5ded1;
+  --line2:#efe8db;
+  --sage:#7d9b7a;
+  --sage-soft:#e6ede3;
+  --gold-accent:#c9a227; /* chỉ dùng làm nét mảnh, không tô mảng */
+
+  /* ---- LỚP 2 · DỮ LIỆU (đã kiểm định — thứ tự slot là cơ chế an toàn mù màu) ---- */
+  --c1:#3b8841;  --c1-t:#e4efe4;   /* lá      · Sinh hoạt            */
+  --c2:#835cbe;  --c2-t:#ece5f6;   /* oải hương · Phát triển bản thân */
+  --c3:#c65d26;  --c3-t:#f8e7dc;   /* đất nung · Giải trí            */
+  --c4:#008b9e;  --c4-t:#dcefF1;   /* hồ nước · Đầu tư               */
+  --c5:#c75374;  --c5-t:#f8e3e9;   /* hoa đào · Mĩ phẩm              */
+  --c6:#b59600;  --c6-t:#f4eed4;   /* nghệ    · Khác                 */
+
+  /* ---- Trạng thái (cố định, không bao giờ đổi theo theme) ---- */
+  --good:#0ca30c; --warn:#fab219; --serious:#ec835a; --crit:#d03b3b; --goodtx:#006300;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--ink);
+  font-family:"Be Vietnam Pro",system-ui,-apple-system,sans-serif;font-size:15px;line-height:1.65;
+  -webkit-font-smoothing:antialiased}
+.wrap{max-width:1240px;margin:0 auto;padding:0 24px}
+h1{font-family:"Fraunces",Georgia,serif;font-size:clamp(28px,3.8vw,42px);font-weight:600;
+  letter-spacing:-.015em;margin:8px 0 10px}
+h2{font-family:"Fraunces",Georgia,serif;font-size:25px;font-weight:600;margin:0 0 4px}
+h3{font-size:16px;font-weight:600;margin:26px 0 8px}
+h4{font-size:14px;font-weight:600;margin:0 0 6px}
+.eyebrow{font-size:11.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--sage);font-weight:700}
+.lead{color:var(--ink2);max-width:80ch;margin:0 0 24px}
+header{padding:50px 0 32px;border-bottom:1px solid var(--line)}
+section{padding:44px 0;border-bottom:1px solid var(--line)}
+code{background:var(--surface2);border:1px solid var(--line2);padding:1px 5px;border-radius:5px;
+  font-size:.86em;font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+p{max-width:82ch}
+ul,ol{color:var(--ink2);max-width:82ch;padding-left:22px}
+li{margin:5px 0} li strong{color:var(--ink)}
+
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:560px}
+th{text-align:left;padding:10px 13px;background:var(--surface2);font-size:11.5px;font-weight:700;
+  letter-spacing:.05em;text-transform:uppercase;color:var(--ink2);border-bottom:1px solid var(--line)}
+td{padding:10px 13px;border-bottom:1px solid var(--line2);color:var(--ink2);vertical-align:top}
+tbody tr:last-child td{border-bottom:none}
+td b,td strong{color:var(--ink)}
+
+.box{border:1px solid var(--line);border-left:3px solid var(--sage);border-radius:12px;
+  padding:15px 17px;margin:18px 0;background:var(--surface)}
+.box.w{border-left-color:var(--warn)} .box.g{border-left-color:var(--good)}
+.box.k{border-left-color:var(--c2)}
+.box .t{font-weight:700;font-size:14px;margin-bottom:5px}
+.box p{margin:0;font-size:14px;color:var(--ink2)}
+
+/* swatches */
+.sws{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin:16px 0}
+.sw{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--surface)}
+.sw .chip{height:52px}
+.sw .m{padding:9px 11px}
+.sw .m b{display:block;font-size:13px}
+.sw .m span{font-size:11.5px;color:var(--muted);font-family:ui-monospace,Menlo,monospace}
+
+/* font specimens */
+.fs{border:1px solid var(--line);border-radius:14px;padding:16px 18px;background:var(--surface);margin:12px 0}
+.fs .nm{font-size:12px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;font-weight:700}
+.fs .big{font-size:34px;font-weight:600;letter-spacing:-.02em;margin:6px 0 2px}
+.fs .sm{font-size:14px;color:var(--ink2)}
+.fs .num{font-size:26px;font-weight:600;letter-spacing:-.01em;margin-top:6px}
+
+/* phone */
+.screens{display:flex;gap:26px;flex-wrap:wrap;align-items:flex-start}
+.unit{width:396px;flex:none}
+.phone{width:396px;background:var(--surface);border:1px solid var(--line);border-radius:30px;
+  padding:18px 16px 16px;box-shadow:0 1px 2px rgba(32,36,31,.04),0 10px 30px rgba(74,107,82,.09)}
+.cap{margin-top:12px;font-size:13.5px;color:var(--ink2)}
+.cap b{color:var(--ink)}
+
+.tbar{display:flex;justify-content:space-between;align-items:center;
+  font-size:12.5px;color:var(--muted);margin-bottom:14px}
+.brand{font-family:"Fraunces",serif;font-size:17px;font-weight:600;color:var(--sage-deep,#4a6b52);
+  letter-spacing:-.01em}
+
+.hero-lbl{font-size:13.5px;color:var(--ink2)}
+.hero{font-size:54px;font-weight:600;letter-spacing:-.035em;line-height:1.02;margin:2px 0 4px}
+.hero .cur{font-size:25px;font-weight:500;color:var(--ink2);margin-left:3px;letter-spacing:0}
+.pill{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:700;
+  padding:3px 9px;border-radius:999px;border:1px solid transparent}
+.pill.warn{background:#fdf3dd;color:#6b4d05;border-color:#f2e2b8}
+.pill.good{background:#e4f3e4;color:var(--goodtx);border-color:#cfe7cf}
+.pill.crit{background:#fbe7e7;color:#8c1f1f;border-color:#f2cfcf}
+
+.pace{margin:15px 0 2px}
+.pace .track{position:relative;height:13px;border-radius:7px;background:var(--sage-soft)}
+.pace .fill{height:13px;border-radius:7px 4px 4px 7px;background:var(--warn)}
+.pace .marker{position:absolute;top:-5px;bottom:-5px;width:2px;background:var(--ink);border-radius:1px}
+.pace .mlbl{position:absolute;top:16px;font-size:11px;color:var(--ink2);transform:translateX(-50%);white-space:nowrap}
+.pace .legend{display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);margin-top:26px}
+
+.tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:16px 0 2px}
+.tile{background:var(--surface2);border:1px solid var(--line2);border-radius:13px;padding:10px 11px}
+.tile .l{font-size:11px;color:var(--muted)}
+.tile .v{font-size:17px;font-weight:600;letter-spacing:-.01em;margin-top:1px}
+.tile .d{font-size:11px;color:var(--ink2)}
+
+/* quick add — icon tròn pastel */
+.qa{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.qbtn{border:1px solid var(--line2);border-radius:16px;background:var(--surface);
+  padding:12px 6px 10px;text-align:center}
+.qbtn .ic{width:40px;height:40px;border-radius:14px;display:grid;place-items:center;margin:0 auto 7px}
+.qbtn .n{font-size:12.5px;font-weight:600;display:block;line-height:1.25}
+.qbtn .s{font-size:10px;color:var(--muted);line-height:1.3;display:block;margin-top:1px}
+.qbtn.save{border-color:#cfe7cf;background:#f2f8f1}
+.qbtn.add{border-style:dashed;border-color:var(--line)}
+
+.cta{margin-top:14px;border:1px solid var(--line2);border-radius:16px;
+  background:linear-gradient(180deg,#f4f8f2,#f7f4ed);
+  padding:12px 14px;display:flex;justify-content:space-between;align-items:center;font-size:13.5px}
+
+.card{border:1px solid var(--line2);border-radius:16px;padding:15px;margin-top:14px;background:var(--surface)}
+.card h4{margin:0 0 2px;font-size:14px}
+.card .sub{font-size:11.5px;color:var(--muted);margin-bottom:10px}
+
+.ll .r{display:grid;grid-template-columns:24px 1fr auto auto;gap:9px;align-items:center;
+  padding:7px 0;border-bottom:1px solid var(--line2);font-size:13px}
+.ll .r:last-child{border-bottom:none}
+.ll .dot{width:22px;height:22px;border-radius:8px;display:grid;place-items:center}
+.ll .nm{color:var(--ink)}
+.ll .vl{font-variant-numeric:tabular-nums;color:var(--ink);font-weight:500}
+.ll .pc{font-variant-numeric:tabular-nums;color:var(--muted);width:44px;text-align:right}
+
+.mt{margin:11px 0}
+.mt .top{display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:4px}
+.mt .top .r{color:var(--ink2);font-variant-numeric:tabular-nums}
+.mt .track{height:9px;border-radius:5px;background:var(--sage-soft);overflow:hidden}
+.mt .fill{height:9px;border-radius:5px 2px 2px 5px}
+
+/* BOTTOM NAV — to hơn, đậm hơn theo yêu cầu */
+.nav{display:grid;grid-template-columns:repeat(5,1fr);align-items:end;margin-top:20px;
+  border-top:1px solid var(--line);padding-top:12px}
+.nav .it{text-align:center;font-size:12.5px;font-weight:600;color:var(--muted);
+  padding:5px 2px 3px;border-radius:12px}
+.nav .it.on{color:var(--c1);background:var(--c1-t);font-weight:700}
+.nav .it svg{display:block;margin:0 auto 3px}
+.nav .plusw{display:grid;place-items:center}
+.nav .plus{width:58px;height:58px;border-radius:50%;background:var(--c1);color:#fff;
+  display:grid;place-items:center;margin-top:-26px;font-size:30px;font-weight:400;line-height:1;
+  box-shadow:0 6px 16px rgba(59,136,65,.32),0 0 0 5px var(--surface)}
+
+.flow{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12.5px;line-height:1.85;
+  color:var(--ink2);overflow-x:auto;margin:16px 0;white-space:pre}
+.flow b{color:var(--ink)}
+footer{padding:32px 0 56px;color:var(--muted);font-size:13px}
+#tt{position:fixed;pointer-events:none;background:var(--ink);color:#fff;font-size:12px;
+  padding:6px 9px;border-radius:8px;opacity:0;transition:opacity .1s;z-index:99;white-space:nowrap}
+.garden{display:flex;gap:6px;flex-wrap:wrap;align-items:flex-end}
+.gd{text-align:center}
+.gd .lb{font-size:9.5px;color:var(--muted);margin-top:1px}
+</style>
+</head>
+<body>
+<div id="tt"></div>
+
+<!-- sprite icon MỤC TIÊU — Phosphor Fill nguyên bản, viewBox 0 0 256 256 -->
+<svg style="display:none">
+  <symbol id="g-house" viewBox="0 0 256 256"><path d="M224,120v96a8,8,0,0,1-8,8H160a8,8,0,0,1-8-8V164a4,4,0,0,0-4-4H108a4,4,0,0,0-4,4v52a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8V120a16,16,0,0,1,4.69-11.31l80-80a16,16,0,0,1,22.62,0l80,80A16,16,0,0,1,224,120Z"/></symbol>
+  <symbol id="g-car" viewBox="0 0 256 256"><path d="M240,104H229.2L201.42,41.5A16,16,0,0,0,186.8,32H69.2a16,16,0,0,0-14.62,9.5L26.8,104H16a8,8,0,0,0,0,16h8v80a16,16,0,0,0,16,16H64a16,16,0,0,0,16-16v-8h96v8a16,16,0,0,0,16,16h24a16,16,0,0,0,16-16V120h8a8,8,0,0,0,0-16ZM80,152H56a8,8,0,0,1,0-16H80a8,8,0,0,1,0,16Zm120,0H176a8,8,0,0,1,0-16h24a8,8,0,0,1,0,16ZM44.31,104,69.2,48H186.8l24.89,56Z"/></symbol>
+  <symbol id="g-camera" viewBox="0 0 256 256"><path d="M208,56H180.28L166.65,35.56A8,8,0,0,0,160,32H96a8,8,0,0,0-6.65,3.56L75.71,56H48A24,24,0,0,0,24,80V192a24,24,0,0,0,24,24H208a24,24,0,0,0,24-24V80A24,24,0,0,0,208,56Zm-44,76a36,36,0,1,1-36-36A36,36,0,0,1,164,132Z"/></symbol>
+  <symbol id="g-airplane-tilt" viewBox="0 0 256 256"><path d="M215.52,197.26a8,8,0,0,1-1.86,8.39l-24,24A8,8,0,0,1,184,232a7.09,7.09,0,0,1-.79,0,8,8,0,0,1-5.87-3.52l-44.07-66.12L112,183.59V208a8,8,0,0,1-2.34,5.65s-14,14.06-15.88,15.88A7.91,7.91,0,0,1,91,231.41a8,8,0,0,1-10.41-4.35l-.06-.15-14.7-36.76L29,175.42a8,8,0,0,1-2.69-13.08l16-16A8,8,0,0,1,48,144H72.4l21.27-21.27L27.56,78.65a8,8,0,0,1-1.22-12.32l24-24a8,8,0,0,1,8.39-1.86l85.94,31.25L176.2,40.19a28,28,0,0,1,39.6,39.6l-31.53,31.53Z"/></symbol>
+  <symbol id="g-graduation-cap" viewBox="0 0 256 256"><path d="M176,207.24a119,119,0,0,0,16-7.73V240a8,8,0,0,1-16,0Zm11.76-88.43-56-29.87a8,8,0,0,0-7.52,14.12L171,128l17-9.06Zm64-29.87-120-64a8,8,0,0,0-7.52,0l-120,64a8,8,0,0,0,0,14.12L32,117.87v48.42a15.91,15.91,0,0,0,4.06,10.65C49.16,191.53,78.51,216,128,216a130,130,0,0,0,48-8.76V130.67L171,128l-43,22.93L43.83,106l0,0L25,96,128,41.07,231,96l-18.78,10-.06,0L188,118.94a8,8,0,0,1,4,6.93v73.64a115.63,115.63,0,0,0,27.94-22.57A15.91,15.91,0,0,0,224,166.29V117.87l27.76-14.81a8,8,0,0,0,0-14.12Z"/></symbol>
+  <symbol id="g-gift" viewBox="0 0 256 256"><path d="M216,72H180.92c.39-.33.79-.65,1.17-1A29.53,29.53,0,0,0,192,49.57,32.62,32.62,0,0,0,158.44,16,29.53,29.53,0,0,0,137,25.91a54.94,54.94,0,0,0-9,14.48,54.94,54.94,0,0,0-9-14.48A29.53,29.53,0,0,0,97.56,16,32.62,32.62,0,0,0,64,49.57,29.53,29.53,0,0,0,73.91,71c.38.33.78.65,1.17,1H40A16,16,0,0,0,24,88v32a16,16,0,0,0,16,16v64a16,16,0,0,0,16,16h60a4,4,0,0,0,4-4V120H40V88h80v32h16V88h80v32H136v92a4,4,0,0,0,4,4h60a16,16,0,0,0,16-16V136a16,16,0,0,0,16-16V88A16,16,0,0,0,216,72ZM84.51,59a13.69,13.69,0,0,1-4.5-10A16.62,16.62,0,0,1,96.59,32h.49a13.69,13.69,0,0,1,10,4.5c8.39,9.48,11.35,25.2,12.39,34.92C109.71,70.39,94,67.43,84.51,59Zm87,0c-9.49,8.4-25.24,11.36-35,12.4C137.7,60.89,141,45.5,149,36.51a13.69,13.69,0,0,1,10-4.5h.49A16.62,16.62,0,0,1,176,49.08,13.69,13.69,0,0,1,171.49,59Z"/></symbol>
+  <symbol id="g-paw-print" viewBox="0 0 256 256"><path d="M240,108a28,28,0,1,1-28-28A28,28,0,0,1,240,108ZM72,108a28,28,0,1,0-28,28A28,28,0,0,0,72,108ZM92,88A28,28,0,1,0,64,60,28,28,0,0,0,92,88Zm72,0a28,28,0,1,0-28-28A28,28,0,0,0,164,88Zm23.12,60.86a35.3,35.3,0,0,1-16.87-21.14,44,44,0,0,0-84.5,0A35.25,35.25,0,0,1,69,148.82,40,40,0,0,0,88,224a39.48,39.48,0,0,0,15.52-3.13,64.09,64.09,0,0,1,48.87,0,40,40,0,0,0,34.73-72Z"/></symbol>
+  <symbol id="g-plant" viewBox="0 0 256 256"><path d="M205.41,159.07a60.9,60.9,0,0,1-31.83,8.86,71.71,71.71,0,0,1-27.36-5.66A55.55,55.55,0,0,0,136,194.51V224a8,8,0,0,1-8.53,8,8.18,8.18,0,0,1-7.47-8.25V211.31L81.38,172.69A52.5,52.5,0,0,1,63.44,176a45.82,45.82,0,0,1-23.92-6.67C17.73,156.09,6,125.62,8.27,87.79a8,8,0,0,1,7.52-7.52c37.83-2.23,68.3,9.46,81.5,31.25A46,46,0,0,1,103.74,140a4,4,0,0,1-6.89,2.43l-19.2-20.1a8,8,0,0,0-11.31,11.31l53.88,55.25c.06-.78.13-1.56.21-2.33a68.56,68.56,0,0,1,18.64-39.46l50.59-53.46a8,8,0,0,0-11.31-11.32l-49,51.82a4,4,0,0,1-6.78-1.74c-4.74-17.48-2.65-34.88,6.4-49.82,17.86-29.48,59.42-45.26,111.18-42.22a8,8,0,0,1,7.52,7.52C250.67,99.65,234.89,141.21,205.41,159.07Z"/></symbol>
+  <symbol id="g-heartbeat" viewBox="0 0 256 256"><path d="M240,102c0,70-103.79,126.66-108.21,129a8,8,0,0,1-7.58,0c-3.35-1.8-63.55-34.69-92.68-80.89A4,4,0,0,1,34.92,144H72a8,8,0,0,0,6.66-3.56l9.34-14,25.34,38a8,8,0,0,0,9.16,3.16,8.23,8.23,0,0,0,4.28-3.34L140.28,144H160a8,8,0,0,0,8-8.53,8.18,8.18,0,0,0-8.25-7.47H136a8,8,0,0,0-6.66,3.56l-9.34,14-25.34-38a8,8,0,0,0-9.17-3.16,8.25,8.25,0,0,0-4.27,3.34L67.72,128H23.53a4,4,0,0,1-3.83-2.81A76.93,76.93,0,0,1,16,102,62.07,62.07,0,0,1,78,40c20.65,0,38.73,8.88,50,23.89C139.27,48.88,157.35,40,178,40A62.07,62.07,0,0,1,240,102Z"/></symbol>
+  <symbol id="g-diamond" viewBox="0 0 256 256"><path d="M240,128a15.85,15.85,0,0,1-4.67,11.28l-96.05,96.06a16,16,0,0,1-22.56,0h0l-96-96.06a16,16,0,0,1,0-22.56l96.05-96.06a16,16,0,0,1,22.56,0l96.05,96.06A15.85,15.85,0,0,1,240,128Z"/></symbol>
+  <symbol id="g-laptop" viewBox="0 0 256 256"><path d="M232,168h-8V72a24,24,0,0,0-24-24H56A24,24,0,0,0,32,72v96H24a8,8,0,0,0-8,8v16a24,24,0,0,0,24,24H216a24,24,0,0,0,24-24V176A8,8,0,0,0,232,168ZM112,72h32a8,8,0,0,1,0,16H112a8,8,0,0,1,0-16ZM224,192a8,8,0,0,1-8,8H40a8,8,0,0,1-8-8v-8H224Z"/></symbol>
+  <symbol id="g-motorcycle" viewBox="0 0 256 256"><path d="M216,120a41,41,0,0,0-6.6.55l-5.82-15.14A55.64,55.64,0,0,1,216,104a8,8,0,0,0,0-16H196.88L183.47,53.13A8,8,0,0,0,176,48H144a8,8,0,0,0,0,16h26.51l9.23,24H152c-18.5,0-33.5,4.31-43.37,12.46a16,16,0,0,1-16.76,2.07c-10.58-4.81-73.29-30.12-73.8-30.26a8,8,0,0,0-5,15.19S68.57,109.4,79.6,120.4A55.67,55.67,0,0,1,95.43,152H79.2a40,40,0,1,0,0,16h52.12a31.91,31.91,0,0,0,30.74-23.1,56,56,0,0,1,26.59-33.72l5.82,15.13A40,40,0,1,0,216,120ZM40,168H62.62a24,24,0,1,1,0-16H40a8,8,0,0,0,0,16Zm176,16a24,24,0,0,1-15.58-42.23l8.11,21.1a8,8,0,1,0,14.94-5.74L215.35,136l.65,0a24,24,0,0,1,0,48Z"/></symbol>
+  <symbol id="g-suitcase-rolling" viewBox="0 0 256 256"><path d="M192,48H168V24A24,24,0,0,0,144,0H112A24,24,0,0,0,88,24V48H64A16,16,0,0,0,48,64V208a16,16,0,0,0,16,16H80v16a8,8,0,0,0,16,0V224h64v16a8,8,0,0,0,16,0V224h16a16,16,0,0,0,16-16V64A16,16,0,0,0,192,48ZM96,192a8,8,0,0,1-16,0V80a8,8,0,0,1,16,0Zm40,0a8,8,0,0,1-16,0V80a8,8,0,0,1,16,0ZM152,48H104V24a8,8,0,0,1,8-8h32a8,8,0,0,1,8,8Zm24,144a8,8,0,0,1-16,0V80a8,8,0,0,1,16,0Z"/></symbol>
+  <symbol id="g-baby-carriage" viewBox="0 0 256 256"><path d="M215.58,54.55a7.53,7.53,0,0,0-1.32-1.27A79.68,79.68,0,0,0,160,32h-8a16,16,0,0,0-16,16v56H55.2A40.07,40.07,0,0,0,16,72a8,8,0,0,0,0,16,24,24,0,0,1,24,24,80.09,80.09,0,0,0,80,80h40A79.94,79.94,0,0,0,215.58,54.55Zm-6.91,16A63.73,63.73,0,0,1,223.48,104H166.81ZM160,48a63.59,63.59,0,0,1,36.69,11.61L152,95.35V48ZM104,224a16,16,0,1,1-16-16A16,16,0,0,1,104,224Zm104,0a16,16,0,1,1-16-16A16,16,0,0,1,208,224Z"/></symbol>
+  <symbol id="g-storefront" viewBox="0 0 256 256"><path d="M231.69,93.81,217.35,43.6A16.07,16.07,0,0,0,202,32H54A16.07,16.07,0,0,0,38.65,43.6L24.31,93.81A7.94,7.94,0,0,0,24,96v16a40,40,0,0,0,16,32v72a8,8,0,0,0,8,8H208a8,8,0,0,0,8-8V144a40,40,0,0,0,16-32V96A7.94,7.94,0,0,0,231.69,93.81ZM88,112a24,24,0,0,1-35.12,21.26,7.88,7.88,0,0,0-1.82-1.06A24,24,0,0,1,40,112v-8H88Zm64,0a24,24,0,0,1-48,0v-8h48Zm64,0a24,24,0,0,1-11.07,20.2,8.08,8.08,0,0,0-1.8,1.05A24,24,0,0,1,168,112v-8h48Z"/></symbol>
+  <symbol id="g-coins" viewBox="0 0 256 256"><path d="M184,89.57V84c0-25.08-37.83-44-88-44S8,58.92,8,84v40c0,20.89,26.25,37.49,64,42.46V172c0,25.08,37.83,44,88,44s88-18.92,88-44V132C248,111.3,222.58,94.68,184,89.57ZM56,146.87C36.41,141.4,24,132.39,24,124V109.93c8.16,5.78,19.09,10.44,32,13.57Zm80-23.37c12.91-3.13,23.84-7.79,32-13.57V124c0,8.39-12.41,17.4-32,22.87Zm-16,71.37C100.41,189.4,88,180.39,88,172v-4.17c2.63.1,5.29.17,8,.17,3.88,0,7.67-.13,11.39-.35A121.92,121.92,0,0,0,120,171.41Zm0-44.62A163,163,0,0,1,96,152a163,163,0,0,1-24-1.75V126.46A183.74,183.74,0,0,0,96,128a183.74,183.74,0,0,0,24-1.54Zm64,48a165.45,165.45,0,0,1-48,0V174.4a179.48,179.48,0,0,0,24,1.6,183.74,183.74,0,0,0,24-1.54ZM232,172c0,8.39-12.41,17.4-32,22.87V171.5c12.91-3.13,23.84-7.79,32-13.57Z"/></symbol>
+  <symbol id="g-bed" viewBox="0 0 256 256"><path d="M216,72H32V48a8,8,0,0,0-16,0V208a8,8,0,0,0,16,0V176H240v32a8,8,0,0,0,16,0V112A40,40,0,0,0,216,72ZM32,88h72v72H32Z"/></symbol>
+  <symbol id="g-key" viewBox="0 0 256 256"><path d="M216.57,39.43A80,80,0,0,0,83.91,120.78L28.69,176A15.86,15.86,0,0,0,24,187.31V216a16,16,0,0,0,16,16H72a8,8,0,0,0,8-8V208H96a8,8,0,0,0,8-8V184h16a8,8,0,0,0,5.66-2.34l9.56-9.57A79.73,79.73,0,0,0,160,176h.1A80,80,0,0,0,216.57,39.43ZM180,92a16,16,0,1,1,16-16A16,16,0,0,1,180,92Z"/></symbol>
+  <symbol id="g-trophy" viewBox="0 0 256 256"><path d="M232,64H208V48a8,8,0,0,0-8-8H56a8,8,0,0,0-8,8V64H24A16,16,0,0,0,8,80V96a40,40,0,0,0,40,40h3.65A80.13,80.13,0,0,0,120,191.61V216H96a8,8,0,0,0,0,16h64a8,8,0,0,0,0-16H136V191.58c31.94-3.23,58.44-25.64,68.08-55.58H208a40,40,0,0,0,40-40V80A16,16,0,0,0,232,64ZM48,120A24,24,0,0,1,24,96V80H48v32q0,4,.39,8ZM232,96a24,24,0,0,1-24,24h-.5a81.81,81.81,0,0,0,.5-8.9V80h24Z"/></symbol>
+  <symbol id="g-couch" viewBox="0 0 256 256"><path d="M16,100V72A16,16,0,0,1,32,56h84a4,4,0,0,1,4,4v76H64a32,32,0,0,0-32-32H20A4,4,0,0,1,16,100Zm208,4h12a4,4,0,0,0,4-4V72a16,16,0,0,0-16-16H140a4,4,0,0,0-4,4v76h56A32,32,0,0,1,224,104Zm8,16h-8a16,16,0,0,0-16,16v8a8,8,0,0,1-8,8H56a8,8,0,0,1-8-8v-8a16,16,0,0,0-16-16H24A16,16,0,0,0,8,136v32a16,16,0,0,0,16,16h8v15.73A8.18,8.18,0,0,0,39.47,208,8,8,0,0,0,48,200V184H208v15.73a8.17,8.17,0,0,0,7.47,8.25,8,8,0,0,0,8.53-8V184h8a16,16,0,0,0,16-16V136A16,16,0,0,0,232,120Z"/></symbol>
+</svg>
+
+<!-- icon sprite giao diện -->
+<svg style="display:none">
+  <symbol id="i-bowl" viewBox="0 0 24 24"><path d="M3.5 11.5h17a8.5 8.5 0 0 1-17 0Z"/><path d="M9 7.5c0-1.2 1-1.6 1-2.8M13 7.8c0-1.5 1.2-1.9 1.2-3.3"/></symbol>
+  <symbol id="i-glass" viewBox="0 0 24 24"><path d="M4.5 4.5h15l-7.5 8-7.5-8Z"/><path d="M12 12.5V20M8.5 20h7"/></symbol>
+  <symbol id="i-sprout" viewBox="0 0 24 24"><path d="M12 20v-7"/><path d="M12 13c0-3 2.2-5.2 5.5-5.2 0 3.2-2.4 5.2-5.5 5.2Z"/><path d="M12 15.5c-2.6 0-4.6-1.8-4.6-4.5 2.9 0 4.6 1.7 4.6 4.5Z"/></symbol>
+  <symbol id="i-lipstick" viewBox="0 0 24 24"><path d="M9.2 12.4h5.6v7.4a1.4 1.4 0 0 1-1.4 1.4h-2.8a1.4 1.4 0 0 1-1.4-1.4v-7.4Z"/><path d="M8.5 12.4h7"/><path d="M10.2 12.4V7.7l3.2-2.5a.7.7 0 0 1 1.1.55v6.65"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M12 6.8S10.2 5 6.5 5H4v13h2.8c3.4 0 5.2 1.6 5.2 1.6s1.8-1.6 5.2-1.6H20V5h-2.5C13.8 5 12 6.8 12 6.8Z"/><path d="M12 6.8v12.8"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 6v12M6 12h12"/></symbol>
+  <symbol id="i-jar" viewBox="0 0 24 24"><path d="M7.6 5.2h8.8v2.6H7.6z"/><path d="M8.3 7.8h7.4l1 10.4a1.6 1.6 0 0 1-1.6 1.8H8.9a1.6 1.6 0 0 1-1.6-1.8l1-10.4Z"/><path d="M12 12.4c-1.5-1.4-3 .5-1.4 1.8l1.4 1.3 1.4-1.3c1.6-1.3.1-3.2-1.4-1.8Z"/></symbol>
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V20H4v-9.5Z"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v4.3l2.8 1.7"/></symbol>
+  <symbol id="i-leafpot" viewBox="0 0 24 24"><path d="M6 13h12l-1.2 6.5H7.2L6 13Z"/><path d="M12 13V8"/><path d="M12 9.5c0-2.4 1.8-4 4.4-4 0 2.6-2 4-4.4 4Z"/></symbol>
+  <symbol id="i-dots" viewBox="0 0 24 24"><circle cx="6" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="18" cy="12" r="1.4"/></symbol>
+</svg>
+
+<header><div class="wrap">
+  <div class="eyebrow">sobo · vòng 3 · hướng thị giác</div>
+  <h1>Thiên nhiên · chill · một chút sang</h1>
+  <p class="lead">Bản v2 áp dụng 7 góp ý UI/UX của bạn, kèm phần trả lời 5 câu hỏi về ngày lương,
+  quỹ dự phòng, kỳ hạn trả nợ, thời gian để nguội, và chuyện "nhập lại dữ liệu lịch sử".
+  Có <b>một phát hiện quan trọng về màu</b> ở ngay dưới đây — đọc trước khi xem mockup.</p>
+</div></header>
+
+<!-- ============ MÀU ============ -->
+<section><div class="wrap">
+  <h2>Màu — vì sao phải chia làm hai lớp</h2>
+
+  <div class="box w">
+    <div class="t">⚠ Phát hiện: bảng màu pastel dễ thương KHÔNG qua được kiểm định mù màu</div>
+    <p>Tôi đã thử ba bảng màu thiên nhiên nhạt kiểu bạn mô tả (xanh rêu, đất nung nhạt, hồng phấn).
+    Cả ba đều <b>trượt</b>: màu quá nhạt thì máy đọc là “xám”, và cặp <i>xanh rêu ↔ đất nung</i>
+    lệch nhau chỉ <b>ΔE 1,7</b> với người mù màu đỏ-lục — tức là <b>gần như cùng một màu</b>.
+    Nếu dùng bảng đó, biểu đồ tròn sẽ vô nghĩa với ~8% nam giới, và nhìn mờ đục với tất cả mọi người
+    khi lát bánh nhỏ.</p>
+  </div>
+
+  <div class="box g">
+    <div class="t">✓ Cách giải: tách làm hai lớp màu</div>
+    <p><b>Lớp 1 — giao diện (chiếm ~92% màn hình):</b> nền kem, cát ấm, xanh sage nhạt, viền be.
+    Đây là thứ tạo cảm giác thiên nhiên và chill. <b>Không mang dữ liệu.</b></p>
+    <p style="margin-top:9px"><b>Lớp 2 — dữ liệu (chỉ xuất hiện ở ô nhỏ &amp; lát mỏng):</b> 6 màu
+    đậm hơn, đã kiểm định. Vì chúng chỉ nằm trong <i>ô icon 40px</i> và <i>vành donut 22px</i>, chúng
+    không làm màn hình bị “gắt” — ngược lại, đây chính là nguyên tắc <b>“dữ liệu là thứ duy nhất
+    được phép nổi bật”</b>. Nền càng dịu thì dữ liệu càng đọc được.</p>
+  </div>
+
+  <h3>Lớp 1 — giao diện</h3>
+  <div class="sws">
+    <div class="sw"><div class="chip" style="background:#f2ede3"></div><div class="m"><b>Cát ấm — nền trang</b><span>#f2ede3</span></div></div>
+    <div class="sw"><div class="chip" style="background:#faf7f2"></div><div class="m"><b>Kem — mặt thẻ</b><span>#faf7f2</span></div></div>
+    <div class="sw"><div class="chip" style="background:#e6ede3"></div><div class="m"><b>Sage nhạt — thanh nền</b><span>#e6ede3</span></div></div>
+    <div class="sw"><div class="chip" style="background:#7d9b7a"></div><div class="m"><b>Sage — nét trang trí</b><span>#7d9b7a</span></div></div>
+    <div class="sw"><div class="chip" style="background:#c9a227"></div><div class="m"><b>Vàng đồng — nét mảnh “sang”</b><span>#c9a227</span></div></div>
+    <div class="sw"><div class="chip" style="background:#20241f"></div><div class="m"><b>Than ấm — chữ chính</b><span>#20241f</span></div></div>
+  </div>
+  <p style="font-size:13.5px;color:var(--ink2)"><b>Vàng đồng chỉ dùng làm nét mảnh</b> (đường kẻ
+  1px, viền icon mục tiêu, ngôi sao nhỏ) — không bao giờ tô mảng lớn. Đó là khác biệt giữa “sang”
+  và “diêm dúa”.</p>
+
+  <h3>Lớp 2 — dữ liệu (thứ tự slot là cơ chế an toàn mù màu, không được đổi)</h3>
+  <div class="sws">
+    <div class="sw"><div class="chip" style="background:#3b8841"></div><div class="m"><b>1 · Lá — Sinh hoạt</b><span>#3b8841</span></div></div>
+    <div class="sw"><div class="chip" style="background:#835cbe"></div><div class="m"><b>2 · Oải hương — Phát triển</b><span>#835cbe</span></div></div>
+    <div class="sw"><div class="chip" style="background:#c65d26"></div><div class="m"><b>3 · Đất nung — Giải trí</b><span>#c65d26</span></div></div>
+    <div class="sw"><div class="chip" style="background:#008b9e"></div><div class="m"><b>4 · Hồ nước — Đầu tư</b><span>#008b9e</span></div></div>
+    <div class="sw"><div class="chip" style="background:#c75374"></div><div class="m"><b>5 · Hoa đào — Mĩ phẩm</b><span>#c75374</span></div></div>
+    <div class="sw"><div class="chip" style="background:#b59600"></div><div class="m"><b>6 · Nghệ — Khác</b><span>#b59600</span></div></div>
+  </div>
+
+  <div class="tw"><table>
+    <thead><tr><th>Kiểm định (nền kem #faf7f2, gồm cả cặp nối vòng của donut)</th><th style="width:110px">Kết quả</th></tr></thead>
+    <tbody>
+      <tr><td>Dải sáng — 6 màu nằm trong khoảng đọc được</td><td><b style="color:var(--goodtx)">PASS</b></td></tr>
+      <tr><td>Ngưỡng bão hoà — không màu nào bị đọc thành xám</td><td><b style="color:var(--goodtx)">PASS</b></td></tr>
+      <tr><td>Phân tách mù màu — cặp kề nhau tệ nhất ΔE <b>9,0</b> (ngưỡng ≥8)</td><td><b style="color:var(--goodtx)">PASS</b></td></tr>
+      <tr><td>Thị giác thường — cặp kề nhau tệ nhất ΔE <b>16,8</b> (ngưỡng ≥15)</td><td><b style="color:var(--goodtx)">PASS</b></td></tr>
+      <tr><td>Tương phản nền — chỉ màu Nghệ 2,68:1 (&lt;3:1)</td><td><b style="color:#8a6a00">CẦN NHÃN</b></td></tr>
+    </tbody>
+  </table></div>
+  <p style="font-size:13.5px;color:var(--ink2);margin-top:10px">Màu Nghệ dưới ngưỡng tương phản ⇒
+  <b>luôn phải đi kèm nhãn chữ hiện rõ</b>, không được để đứng một mình. Danh sách chú giải có tên +
+  số tiền + % ở màn ② chính là “nhãn” đó, nên điều kiện được thoả.</p>
+</div></section>
+
+<!-- ============ FONT ============ -->
+<section><div class="wrap">
+  <h2>Font — bốn đề xuất, đều miễn phí &amp; có dấu tiếng Việt đầy đủ</h2>
+  <p class="lead">Font cũ (<code>system-ui</code>) mờ nhạt vì nó là font mặc định của máy — không có
+  tính cách. Bốn font dưới đây đều trên Google Fonts, dùng thương mại thoải mái. Mỗi ô đang được
+  render <b>bằng chính font đó</b> để bạn so trực tiếp.</p>
+
+  <div class="fs" style="font-family:'Be Vietnam Pro',sans-serif">
+    <div class="nm">① Be Vietnam Pro — <b style="color:var(--goodtx)">đề xuất chính</b></div>
+    <div class="big">Hôm nay còn tiêu được</div>
+    <div class="sm">Do người Việt thiết kế riêng cho tiếng Việt — dấu mũ, dấu móc, dấu thanh đặt
+    chuẩn và không bao giờ chồng lên nhau. Có 9 độ đậm nên tạo được thứ bậc rõ ràng. Chữ số đẹp,
+    hơi vuông vắn — hợp với “một chút sang trọng”.</div>
+    <div class="num">235.000đ · 9.180.000đ · 54,0%</div>
+  </div>
+
+  <div class="fs" style="font-family:'Nunito',sans-serif">
+    <div class="nm">② Nunito — dễ thương nhất</div>
+    <div class="big">Hôm nay còn tiêu được</div>
+    <div class="sm">Bo tròn đầu nét, mềm và thân thiện — hợp nhất với hướng “cute, cây cỏ hoa lá”.
+    Nhược điểm: hơi trẻ con, và ở cỡ chữ lớn thì bớt “sang”. Dùng được nếu bạn ưu tiên dễ thương hơn
+    sang trọng.</div>
+    <div class="num">235.000đ · 9.180.000đ · 54,0%</div>
+  </div>
+
+  <div class="fs" style="font-family:'Lexend',sans-serif">
+    <div class="nm">③ Lexend — dễ đọc nhất</div>
+    <div class="big">Hôm nay còn tiêu được</div>
+    <div class="sm">Thiết kế để tăng tốc độ đọc, chữ thoáng, rất sạch. Trung tính hơn — an toàn
+    nhưng ít cá tính hơn Be Vietnam Pro.</div>
+    <div class="num">235.000đ · 9.180.000đ · 54,0%</div>
+  </div>
+
+  <div class="fs" style="font-family:'Fraunces',Georgia,serif">
+    <div class="nm">④ Fraunces — <b>chỉ dùng cho tên app &amp; tiêu đề</b></div>
+    <div class="big">sobo · Sổ của Bồ</div>
+    <div class="sm">Serif hiện đại, có nét “thủ công ấm”. Đây là thứ tạo cảm giác sang trọng nhanh
+    nhất. <b>Nhưng tuyệt đối không dùng cho con số.</b></div>
+  </div>
+
+  <div class="box k">
+    <div class="t">Công thức đề xuất</div>
+    <p><b>Be Vietnam Pro</b> cho toàn bộ giao diện và <b>mọi con số</b> · <b>Fraunces</b> chỉ cho
+    tên app và tiêu đề màn hình. Tỷ lệ khoảng 95% / 5%.</p>
+    <p style="margin-top:9px"><b>Luật cứng:</b> con số lớn (hero, giá trị thẻ) <b>không bao giờ</b>
+    dùng serif — nó biến con số thành đồ trang trí thay vì thông tin. Và không dùng
+    <code>tabular-nums</code> cho số cỡ lớn (chữ số đều bề rộng làm số “235.000” trông rời rạc);
+    chỉ dùng <code>tabular-nums</code> ở cột số cần thẳng hàng như danh sách chú giải.</p>
+    <p style="margin-top:9px"><b>Khi làm thật:</b> tải font về tự host (thư mục
+    <code>web/public/fonts/</code>) thay vì nhúng link Google — nhanh hơn và không phụ thuộc mạng
+    ngoài. Chỉ tải 3 độ đậm cần dùng (400 / 500 / 600) để nhẹ.</p>
+  </div>
+</div></section>
+
+<!-- ============ ICON ============ -->
+<section><div class="wrap">
+  <h2>Icon — thư viện đề xuất</h2>
+
+  <div class="tw"><table>
+    <thead><tr><th style="width:20%">Thư viện</th><th style="width:12%">Giấy phép</th><th>Vì sao hợp / không hợp</th></tr></thead>
+    <tbody>
+      <tr><td><b>Phosphor Icons</b> <span style="color:var(--goodtx);font-weight:700">← chọn</span></td><td>MIT · miễn phí</td>
+        <td>~9.000 icon, <b>6 kiểu</b> (thin / light / regular / bold / fill / <b>duotone</b>). Duotone chính là thứ cho cảm giác “cute nhưng vẫn sang”. Có sẵn <code>Plant</code>, <code>Flower</code>, <code>FlowerLotus</code>, <code>Leaf</code>, <code>PottedPlant</code>, <code>Tree</code> — đúng hướng cây cỏ. Gói React <code>@phosphor-icons/react</code>.</td></tr>
+      <tr><td><b>Solar Icon Set</b></td><td>CC BY · miễn phí</td>
+        <td>Bo tròn, bụ bẫm, có bản duotone rất dễ thương. Ít icon hơn Phosphor nhưng đẹp hơn ở cỡ lớn.</td></tr>
+      <tr><td><b>Lucide</b></td><td>ISC · miễn phí</td>
+        <td>Rất sạch và nhất quán, nhưng <b>hơi lạnh</b> — thiếu chất dễ thương bạn muốn. Dùng cho icon hệ thống (mũi tên, đóng, cài đặt) thì tốt.</td></tr>
+      <tr><td><b>unDraw / Storyset</b></td><td>miễn phí</td>
+        <td>Không phải icon mà là <b>minh hoạ lớn</b> — dùng cho màn hình trống (“chưa có dữ liệu”), onboarding, màn chúc mừng. Đổi được màu chủ đạo cho khớp bảng màu.</td></tr>
+      <tr><td><b>LottieFiles</b></td><td>nhiều gói miễn phí</td>
+        <td>Hoạt ảnh cho lúc đạt mốc mục tiêu, hoa nở, chúc mừng. Nhẹ hơn video, đổi màu được.</td></tr>
+      <tr><td>Emoji hệ thống</td><td>—</td>
+        <td><b>Không nên dùng làm icon danh mục.</b> Emoji iOS có phong cách riêng, không đổi màu được, và trộn với icon line sẽ trông chắp vá. Chỉ dùng emoji trong <i>câu động viên</i> (💚 🌱 ✨).</td></tr>
+    </tbody>
+  </table></div>
+
+  <h3>Icon từng danh mục — bản vẽ thử</h3>
+  <p style="font-size:13.5px;color:var(--ink2)">Mỗi icon nằm trong ô bo tròn 40px, nền là màu danh
+  mục pha loãng ~10%, nét icon là màu danh mục nguyên bản. Cách này vừa dễ thương, vừa giữ được
+  “mỗi danh mục một màu cố định” — bồ nhận ra danh mục bằng <b>cả hình lẫn màu</b>, không phải đoán.</p>
+
+  <div class="qa" style="max-width:620px;grid-template-columns:repeat(6,1fr)">
+    <div class="qbtn"><div class="ic" style="background:var(--c1-t)"><svg width="24" height="24" fill="none" stroke="var(--c1)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-bowl"/></svg></div><span class="n">Sinh hoạt</span></div>
+    <div class="qbtn"><div class="ic" style="background:var(--c3-t)"><svg width="24" height="24" fill="none" stroke="var(--c3)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-glass"/></svg></div><span class="n">Giải trí</span></div>
+    <div class="qbtn"><div class="ic" style="background:var(--c4-t)"><svg width="24" height="24" fill="none" stroke="var(--c4)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-sprout"/></svg></div><span class="n">Đầu tư</span></div>
+    <div class="qbtn"><div class="ic" style="background:var(--c5-t)"><svg width="24" height="24" fill="none" stroke="var(--c5)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-lipstick"/></svg></div><span class="n">Mĩ phẩm</span></div>
+    <div class="qbtn"><div class="ic" style="background:var(--c2-t)"><svg width="24" height="24" fill="none" stroke="var(--c2)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-book"/></svg></div><span class="n">Phát triển</span></div>
+    <div class="qbtn"><div class="ic" style="background:var(--c6-t)"><svg width="24" height="24" fill="none" stroke="var(--c6)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-plus"/></svg></div><span class="n">Khác</span></div>
+  </div>
+  <p style="font-size:12.5px;color:var(--muted);margin-top:8px">Đây là bản vẽ tay tối giản để xem tỷ
+  lệ. Khi làm thật thì lấy icon tương ứng trong Phosphor (Duotone): <code>BowlSteam</code> ·
+  <code>MartiniGlass</code> · <code>Plant</code> · <code>BookOpen</code> · <code>Plus</code>. Riêng <b>Mĩ phẩm</b> thì Phosphor không có cây son — xem ghi chú dưới.</p>
+  <div class="box w" style="margin-top:14px">
+    <div class="t">Icon Mĩ phẩm — không có sẵn trong Phosphor</div>
+    <p>Phosphor <b>không có</b> icon cây son hay lọ kem. Hai lựa chọn:</p>
+    <p style="margin-top:8px"><b>① Vẽ riêng một icon</b> (đang dùng trong mockup): cây son — thân
+    tuýp + vòng cổ + đầu son vát chéo. Vẽ trên đúng lưới 24px, nét 1,7px, đầu nét tròn như Phosphor
+    nên đứng cạnh 5 icon kia không lệch. Chỉ mất ~15 phút và giữ được sự nhất quán.</p>
+    <p style="margin-top:8px"><b>② Dùng <code>perfume</code> của Tabler Icons</b> (MIT, miễn phí,
+    6.100+ icon) — lọ nước hoa, đọc ra “mĩ phẩm” ngay. Nhược điểm: Tabler vẽ trên lưới hơi khác
+    Phosphor nên đứng cạnh nhau sẽ thấy lệch nét đôi chút.</p>
+    <p style="margin-top:8px"><b>Khuyến nghị:</b> chọn ① — trộn hai bộ icon là con đường nhanh nhất
+    làm giao diện trông chắp vá.</p>
+  </div>
+</div></section>
+
+<!-- ============ HOA CUC ============ -->
+<section><div class="wrap">
+  <h2>Hoa cúc trắng — thay cho nhịp ghi chép</h2>
+  <p class="lead">Ý này của bạn hay hơn hàng chấm rất nhiều, vì nó biến “7 ô vuông” thành
+  <b>một vật sống</b>. Tôi thiết kế nó thế này:</p>
+
+  <div class="screens">
+    <div style="flex:none">
+      <div class="card" style="width:396px;margin-top:0">
+        <h4>Tuần này</h4>
+        <div class="sub">Mỗi ngày có ghi = một cánh nở · đủ 5 cánh = tuần xanh</div>
+        <div style="display:flex;align-items:center;gap:16px;margin-top:6px">
+          <svg width="92" height="92" viewBox="0 0 60 60" aria-label="Hoa cúc 4 trên 7 cánh đã nở">
+            <g id="petals">
+              <g><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#fff" stroke="#d9d2c4" stroke-width="1"/></g>
+              <g transform="rotate(51.4 30 30)"><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#fff" stroke="#d9d2c4" stroke-width="1"/></g>
+              <g transform="rotate(102.9 30 30)"><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#fff" stroke="#d9d2c4" stroke-width="1"/></g>
+              <g transform="rotate(154.3 30 30)"><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#efeadf" stroke="none"/></g>
+              <g transform="rotate(205.7 30 30)"><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#fff" stroke="#d9d2c4" stroke-width="1"/></g>
+              <g transform="rotate(257.1 30 30)"><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#efeadf" stroke="none"/></g>
+              <g transform="rotate(308.6 30 30)"><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#efeadf" stroke="none"/></g>
+            </g>
+            <circle cx="30" cy="30" r="7.5" fill="#e8c34a"/>
+            <circle cx="30" cy="30" r="7.5" fill="none" stroke="#c9a227" stroke-width="1"/>
+          </svg>
+          <div>
+            <div style="font-size:15px;font-weight:600">4 / 7 cánh</div>
+            <div style="font-size:13px;color:var(--ink2);margin-top:2px">Còn <b>1 ngày</b> nữa là
+            hoa nở đủ 🌼</div>
+            <div style="font-size:11.5px;color:var(--muted);margin-top:6px">Nhuỵ vàng rực khi đủ 5 cánh</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="width:396px">
+        <h4>Vườn 8 tuần</h4>
+        <div class="sub">Không có chuỗi để mất — chỉ là một luống hoa</div>
+        <div class="garden">
+          <div class="gd"><svg width="38" height="38" viewBox="0 0 60 60"><g><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#fff" stroke="#d9d2c4"/></g><g transform="rotate(51.4 30 30)"><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#fff" stroke="#d9d2c4"/></g><g transform="rotate(102.9 30 30)"><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#fff" stroke="#d9d2c4"/></g><g transform="rotate(154.3 30 30)"><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#fff" stroke="#d9d2c4"/></g><g transform="rotate(205.7 30 30)"><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#fff" stroke="#d9d2c4"/></g><g transform="rotate(257.1 30 30)"><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#efeadf"/></g><g transform="rotate(308.6 30 30)"><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#efeadf"/></g><circle cx="30" cy="30" r="7.5" fill="#e8c34a"/></svg><div class="lb">T24</div></div>
+          <div class="gd"><svg width="38" height="38" viewBox="0 0 60 60"><g><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#fff" stroke="#d9d2c4"/></g><g transform="rotate(51.4 30 30)"><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#fff" stroke="#d9d2c4"/></g><g transform="rotate(102.9 30 30)"><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#fff" stroke="#d9d2c4"/></g><g transform="rotate(154.3 30 30)"><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#fff" stroke="#d9d2c4"/></g><g transform="rotate(205.7 30 30)"><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#fff" stroke="#d9d2c4"/></g><g transform="rotate(257.1 30 30)"><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#fff" stroke="#d9d2c4"/></g><g transform="rotate(308.6 30 30)"><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#fff" stroke="#d9d2c4"/></g><circle cx="30" cy="30" r="7.5" fill="#e8c34a"/></svg><div class="lb">T25</div></div>
+          <div class="gd"><svg width="38" height="38" viewBox="0 0 60 60"><g><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#efeadf"/></g><g transform="rotate(51.4 30 30)"><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#fff" stroke="#d9d2c4"/></g><g transform="rotate(102.9 30 30)"><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#fff" stroke="#d9d2c4"/></g><g transform="rotate(154.3 30 30)"><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#efeadf"/></g><g transform="rotate(205.7 30 30)"><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#efeadf"/></g><g transform="rotate(257.1 30 30)"><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#efeadf"/></g><g transform="rotate(308.6 30 30)"><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#efeadf"/></g><circle cx="30" cy="30" r="7.5" fill="#ded7c6"/></svg><div class="lb">T26</div></div>
+          <div class="gd"><svg width="38" height="38" viewBox="0 0 60 60"><g><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#fff" stroke="#d9d2c4"/></g><g transform="rotate(51.4 30 30)"><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#fff" stroke="#d9d2c4"/></g><g transform="rotate(102.9 30 30)"><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#fff" stroke="#d9d2c4"/></g><g transform="rotate(154.3 30 30)"><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#fff" stroke="#d9d2c4"/></g><g transform="rotate(205.7 30 30)"><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#fff" stroke="#d9d2c4"/></g><g transform="rotate(257.1 30 30)"><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#efeadf"/></g><g transform="rotate(308.6 30 30)"><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#efeadf"/></g><circle cx="30" cy="30" r="7.5" fill="#e8c34a"/></svg><div class="lb">T27</div></div>
+          <div class="gd"><svg width="38" height="38" viewBox="0 0 60 60"><g><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#fff" stroke="#d9d2c4"/></g><g transform="rotate(51.4 30 30)"><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#fff" stroke="#d9d2c4"/></g><g transform="rotate(102.9 30 30)"><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#fff" stroke="#d9d2c4"/></g><g transform="rotate(154.3 30 30)"><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#fff" stroke="#d9d2c4"/></g><g transform="rotate(205.7 30 30)"><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#fff" stroke="#d9d2c4"/></g><g transform="rotate(257.1 30 30)"><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#fff" stroke="#d9d2c4"/></g><g transform="rotate(308.6 30 30)"><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#efeadf"/></g><circle cx="30" cy="30" r="7.5" fill="#e8c34a"/></svg><div class="lb">T28</div></div>
+          <div class="gd"><svg width="38" height="38" viewBox="0 0 60 60"><g><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#fff" stroke="#d9d2c4"/></g><g transform="rotate(51.4 30 30)"><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#fff" stroke="#d9d2c4"/></g><g transform="rotate(102.9 30 30)"><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#fff" stroke="#d9d2c4"/></g><g transform="rotate(154.3 30 30)"><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#fff" stroke="#d9d2c4"/></g><g transform="rotate(205.7 30 30)"><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#efeadf"/></g><g transform="rotate(257.1 30 30)"><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#efeadf"/></g><g transform="rotate(308.6 30 30)"><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#efeadf"/></g><circle cx="30" cy="30" r="7.5" fill="#e8c34a"/></svg><div class="lb">T29</div></div>
+          <div class="gd"><svg width="38" height="38" viewBox="0 0 60 60"><g><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#fff" stroke="#d9d2c4"/></g><g transform="rotate(51.4 30 30)"><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#fff" stroke="#d9d2c4"/></g><g transform="rotate(102.9 30 30)"><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#fff" stroke="#d9d2c4"/></g><g transform="rotate(154.3 30 30)"><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#fff" stroke="#d9d2c4"/></g><g transform="rotate(205.7 30 30)"><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#fff" stroke="#d9d2c4"/></g><g transform="rotate(257.1 30 30)"><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#fff" stroke="#d9d2c4"/></g><g transform="rotate(308.6 30 30)"><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#fff" stroke="#d9d2c4"/></g><circle cx="30" cy="30" r="7.5" fill="#e8c34a"/></svg><div class="lb">T30</div></div>
+          <div class="gd"><svg width="38" height="38" viewBox="0 0 60 60"><g><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#fff" stroke="#d9d2c4"/></g><g transform="rotate(51.4 30 30)"><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#fff" stroke="#d9d2c4"/></g><g transform="rotate(102.9 30 30)"><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#fff" stroke="#d9d2c4"/></g><g transform="rotate(154.3 30 30)"><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#efeadf"/></g><g transform="rotate(205.7 30 30)"><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#fff" stroke="#d9d2c4"/></g><g transform="rotate(257.1 30 30)"><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#efeadf"/></g><g transform="rotate(308.6 30 30)"><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#efeadf"/></g><circle cx="30" cy="30" r="7.5" fill="#e8c34a"/></svg><div class="lb">T31</div></div>
+        </div>
+        <p style="font-size:12.5px;color:var(--goodtx);margin:10px 0 0">7/8 tuần hoa đã nở 🌼</p>
+      </div>
+    </div>
+
+    <div style="flex:1;min-width:330px">
+      <h3 style="margin-top:0">Quy tắc</h3>
+      <ul>
+        <li><b>7 cánh = 7 ngày trong tuần.</b> Ghi được ngày nào thì cánh đó trắng và có viền;
+          chưa ghi thì cánh màu kem nhạt, không viền.</li>
+        <li><b>Đủ 5 cánh → nhuỵ chuyển vàng rực</b> (tuần xanh). Đây là “phần thưởng” duy nhất,
+          không có điểm số, không có con số nào để mất.</li>
+        <li><b>Tuần hỏng thì hoa vẫn ở đó</b>, chỉ là hoa nhỏ nhuỵ xám — nằm im trong luống 8 tuần.
+          Không có thông báo, không có câu nào nhắc tới.</li>
+        <li><b>Hoạt ảnh:</b> khi ghi xong một khoản, cánh hoa tương ứng <i>bung ra</i> trong 400ms
+          (Framer Motion, scale 0.6 → 1 + xoay nhẹ). Rẻ, nhưng đây là khoảnh khắc khiến người ta
+          muốn ghi tiếp.</li>
+        <li><b>Ẩn dụ nhất quán toàn app:</b> <b>ghi chép = hoa nở</b> ·
+          <b>mục tiêu = chính hình mục tiêu, tô xanh dần từ dưới lên</b> · <b>quỹ = luống đất</b>.
+          Đừng trộn thêm ẩn dụ thứ tư (thành phố, thú cưng, huy hiệu) — nhiều ẩn dụ chồng nhau làm
+          app rối và mất chất.</li>
+      </ul>
+
+      <div class="box g">
+        <div class="t">Vì sao hoa hợp hơn hàng chấm</div>
+        <p>Hàng chấm đo <i>hiệu suất</i>. Bông hoa đo <i>sự chăm sóc</i> — và chăm sóc thì lỡ một
+        ngày cũng không sao. Đúng tinh thần “thoải mái nhưng có thúc đẩy nhẹ” bạn đặt ra, và nó
+        loại luôn cảm giác tội lỗi mà streak tạo ra.</p>
+      </div>
+    </div>
+  </div>
+</div></section>
+
+
+<!-- ============ ICON MỤC TIÊU ============ -->
+<section id="icon-muc-tieu"><div class="wrap">
+  <h2>Icon mục tiêu — là chính thứ bồ muốn</h2>
+  <p class="lead">Bạn đúng: một cái cây chung cho mọi mục tiêu thì <b>mua xe và mua nhà trông giống
+  nhau</b> — mất hết bản sắc trong danh sách. Sửa lại: <b>giữ nguyên cơ chế tô màu dần từ dưới lên</b>,
+  nhưng <b>hình dạng</b> thì đúng theo mục tiêu bồ đặt ra.</p>
+
+  <div class="card" style="max-width:760px">
+    <h4>Cùng một cơ chế, ba mục tiêu khác nhau</h4>
+    <div class="sub">Phần xanh = đã đạt · phần xám = còn thiếu · tô từ dưới lên theo %</div>
+    <div style="display:flex;gap:20px;flex-wrap:wrap;margin-top:14px">
+      <div style="text-align:center;width:104px">
+      <svg width="62" height="62" viewBox="0 0 256 256" aria-label="Mua nhà 8%">
+        <defs><clipPath id="cp-house-8"><rect x="0" y="208.6" width="256" height="15.4"/></clipPath></defs>
+        <use href="#g-house" fill="#d9d2c4"/>
+        <g clip-path="url(#cp-house-8)"><use href="#g-house" fill="#3b8841"/></g>
+      </svg>
+      <div style="font-size:12px;font-weight:600;margin-top:2px">Mua nhà</div>
+      <div style="font-size:11px;color:var(--muted)">8% · 40tr/500tr</div>
+    </div>
+      <div style="text-align:center;width:104px">
+      <svg width="62" height="62" viewBox="0 0 256 256" aria-label="Mua xe 34%">
+        <defs><clipPath id="cp-car-34"><rect x="0" y="158.7" width="256" height="65.3"/></clipPath></defs>
+        <use href="#g-car" fill="#d9d2c4"/>
+        <g clip-path="url(#cp-car-34)"><use href="#g-car" fill="#3b8841"/></g>
+      </svg>
+      <div style="font-size:12px;font-weight:600;margin-top:2px">Mua xe</div>
+      <div style="font-size:11px;color:var(--muted)">34% · 22,4tr/66tr</div>
+    </div>
+      <div style="text-align:center;width:104px">
+      <svg width="62" height="62" viewBox="0 0 256 256" aria-label="Máy ảnh film 62%">
+        <defs><clipPath id="cp-camera-62"><rect x="0" y="105.0" width="256" height="119.0"/></clipPath></defs>
+        <use href="#g-camera" fill="#d9d2c4"/>
+        <g clip-path="url(#cp-camera-62)"><use href="#g-camera" fill="#3b8841"/></g>
+      </svg>
+      <div style="font-size:12px;font-weight:600;margin-top:2px">Máy ảnh film</div>
+      <div style="font-size:11px;color:var(--muted)">62% · 7,4tr/12tr</div>
+    </div>
+      <div style="text-align:center;width:104px">
+      <svg width="62" height="62" viewBox="0 0 256 256" aria-label="Đi Đà Lạt 91%">
+        <defs><clipPath id="cp-airplane-tilt-91"><rect x="0" y="49.3" width="256" height="174.7"/></clipPath></defs>
+        <use href="#g-airplane-tilt" fill="#d9d2c4"/>
+        <g clip-path="url(#cp-airplane-tilt-91)"><use href="#g-airplane-tilt" fill="#3b8841"/></g>
+      </svg>
+      <div style="font-size:12px;font-weight:600;margin-top:2px">Đi Đà Lạt</div>
+      <div style="font-size:11px;color:var(--muted)">91% · 5,5tr/6tr</div>
+    </div>
+    </div>
+  </div>
+
+  <h3>Bộ icon mục tiêu — bồ tự chọn khi tạo mục tiêu</h3>
+  <p style="font-size:13.5px;color:var(--ink2)">Tất cả đều có trong <b>Phosphor Icons</b> kiểu
+  <b>Fill</b> (đã kiểm tra trong gói <code>@phosphor-icons/core</code> — 1.530 icon). Dùng kiểu
+  <b>Fill</b> chứ không phải Line, vì chỉ hình khối đặc mới tô màu dần lên được cho ra hình.</p>
+  <div style="display:flex;gap:12px;flex-wrap:wrap;margin:14px 0">
+    <div style="text-align:center;width:78px">
+    <div style="width:52px;height:52px;border-radius:16px;background:var(--surface2);
+         border:1px solid var(--line2);display:grid;place-items:center;margin:0 auto">
+      <svg width="28" height="28" viewBox="0 0 256 256"><use href="#g-house" fill="#5b6157"/></svg></div>
+    <div style="font-size:11px;color:var(--ink2);margin-top:4px;line-height:1.3">Mua nhà</div>
+  </div>
+<div style="text-align:center;width:78px">
+    <div style="width:52px;height:52px;border-radius:16px;background:var(--surface2);
+         border:1px solid var(--line2);display:grid;place-items:center;margin:0 auto">
+      <svg width="28" height="28" viewBox="0 0 256 256"><use href="#g-car" fill="#5b6157"/></svg></div>
+    <div style="font-size:11px;color:var(--ink2);margin-top:4px;line-height:1.3">Mua xe</div>
+  </div>
+<div style="text-align:center;width:78px">
+    <div style="width:52px;height:52px;border-radius:16px;background:var(--surface2);
+         border:1px solid var(--line2);display:grid;place-items:center;margin:0 auto">
+      <svg width="28" height="28" viewBox="0 0 256 256"><use href="#g-motorcycle" fill="#5b6157"/></svg></div>
+    <div style="font-size:11px;color:var(--ink2);margin-top:4px;line-height:1.3">Xe máy</div>
+  </div>
+<div style="text-align:center;width:78px">
+    <div style="width:52px;height:52px;border-radius:16px;background:var(--surface2);
+         border:1px solid var(--line2);display:grid;place-items:center;margin:0 auto">
+      <svg width="28" height="28" viewBox="0 0 256 256"><use href="#g-camera" fill="#5b6157"/></svg></div>
+    <div style="font-size:11px;color:var(--ink2);margin-top:4px;line-height:1.3">Máy ảnh</div>
+  </div>
+<div style="text-align:center;width:78px">
+    <div style="width:52px;height:52px;border-radius:16px;background:var(--surface2);
+         border:1px solid var(--line2);display:grid;place-items:center;margin:0 auto">
+      <svg width="28" height="28" viewBox="0 0 256 256"><use href="#g-laptop" fill="#5b6157"/></svg></div>
+    <div style="font-size:11px;color:var(--ink2);margin-top:4px;line-height:1.3">Laptop</div>
+  </div>
+<div style="text-align:center;width:78px">
+    <div style="width:52px;height:52px;border-radius:16px;background:var(--surface2);
+         border:1px solid var(--line2);display:grid;place-items:center;margin:0 auto">
+      <svg width="28" height="28" viewBox="0 0 256 256"><use href="#g-airplane-tilt" fill="#5b6157"/></svg></div>
+    <div style="font-size:11px;color:var(--ink2);margin-top:4px;line-height:1.3">Du lịch</div>
+  </div>
+<div style="text-align:center;width:78px">
+    <div style="width:52px;height:52px;border-radius:16px;background:var(--surface2);
+         border:1px solid var(--line2);display:grid;place-items:center;margin:0 auto">
+      <svg width="28" height="28" viewBox="0 0 256 256"><use href="#g-graduation-cap" fill="#5b6157"/></svg></div>
+    <div style="font-size:11px;color:var(--ink2);margin-top:4px;line-height:1.3">Học</div>
+  </div>
+<div style="text-align:center;width:78px">
+    <div style="width:52px;height:52px;border-radius:16px;background:var(--surface2);
+         border:1px solid var(--line2);display:grid;place-items:center;margin:0 auto">
+      <svg width="28" height="28" viewBox="0 0 256 256"><use href="#g-diamond" fill="#5b6157"/></svg></div>
+    <div style="font-size:11px;color:var(--ink2);margin-top:4px;line-height:1.3">Cưới</div>
+  </div>
+<div style="text-align:center;width:78px">
+    <div style="width:52px;height:52px;border-radius:16px;background:var(--surface2);
+         border:1px solid var(--line2);display:grid;place-items:center;margin:0 auto">
+      <svg width="28" height="28" viewBox="0 0 256 256"><use href="#g-heartbeat" fill="#5b6157"/></svg></div>
+    <div style="font-size:11px;color:var(--ink2);margin-top:4px;line-height:1.3">Sức khoẻ</div>
+  </div>
+<div style="text-align:center;width:78px">
+    <div style="width:52px;height:52px;border-radius:16px;background:var(--surface2);
+         border:1px solid var(--line2);display:grid;place-items:center;margin:0 auto">
+      <svg width="28" height="28" viewBox="0 0 256 256"><use href="#g-paw-print" fill="#5b6157"/></svg></div>
+    <div style="font-size:11px;color:var(--ink2);margin-top:4px;line-height:1.3">Thú cưng</div>
+  </div>
+<div style="text-align:center;width:78px">
+    <div style="width:52px;height:52px;border-radius:16px;background:var(--surface2);
+         border:1px solid var(--line2);display:grid;place-items:center;margin:0 auto">
+      <svg width="28" height="28" viewBox="0 0 256 256"><use href="#g-couch" fill="#5b6157"/></svg></div>
+    <div style="font-size:11px;color:var(--ink2);margin-top:4px;line-height:1.3">Nội thất</div>
+  </div>
+<div style="text-align:center;width:78px">
+    <div style="width:52px;height:52px;border-radius:16px;background:var(--surface2);
+         border:1px solid var(--line2);display:grid;place-items:center;margin:0 auto">
+      <svg width="28" height="28" viewBox="0 0 256 256"><use href="#g-bed" fill="#5b6157"/></svg></div>
+    <div style="font-size:11px;color:var(--ink2);margin-top:4px;line-height:1.3">Phòng riêng</div>
+  </div>
+<div style="text-align:center;width:78px">
+    <div style="width:52px;height:52px;border-radius:16px;background:var(--surface2);
+         border:1px solid var(--line2);display:grid;place-items:center;margin:0 auto">
+      <svg width="28" height="28" viewBox="0 0 256 256"><use href="#g-key" fill="#5b6157"/></svg></div>
+    <div style="font-size:11px;color:var(--ink2);margin-top:4px;line-height:1.3">Thuê nhà</div>
+  </div>
+<div style="text-align:center;width:78px">
+    <div style="width:52px;height:52px;border-radius:16px;background:var(--surface2);
+         border:1px solid var(--line2);display:grid;place-items:center;margin:0 auto">
+      <svg width="28" height="28" viewBox="0 0 256 256"><use href="#g-storefront" fill="#5b6157"/></svg></div>
+    <div style="font-size:11px;color:var(--ink2);margin-top:4px;line-height:1.3">Mở tiệm</div>
+  </div>
+<div style="text-align:center;width:78px">
+    <div style="width:52px;height:52px;border-radius:16px;background:var(--surface2);
+         border:1px solid var(--line2);display:grid;place-items:center;margin:0 auto">
+      <svg width="28" height="28" viewBox="0 0 256 256"><use href="#g-baby-carriage" fill="#5b6157"/></svg></div>
+    <div style="font-size:11px;color:var(--ink2);margin-top:4px;line-height:1.3">Em bé</div>
+  </div>
+<div style="text-align:center;width:78px">
+    <div style="width:52px;height:52px;border-radius:16px;background:var(--surface2);
+         border:1px solid var(--line2);display:grid;place-items:center;margin:0 auto">
+      <svg width="28" height="28" viewBox="0 0 256 256"><use href="#g-gift" fill="#5b6157"/></svg></div>
+    <div style="font-size:11px;color:var(--ink2);margin-top:4px;line-height:1.3">Quà tặng</div>
+  </div>
+<div style="text-align:center;width:78px">
+    <div style="width:52px;height:52px;border-radius:16px;background:var(--surface2);
+         border:1px solid var(--line2);display:grid;place-items:center;margin:0 auto">
+      <svg width="28" height="28" viewBox="0 0 256 256"><use href="#g-trophy" fill="#5b6157"/></svg></div>
+    <div style="font-size:11px;color:var(--ink2);margin-top:4px;line-height:1.3">Thành tựu</div>
+  </div>
+<div style="text-align:center;width:78px">
+    <div style="width:52px;height:52px;border-radius:16px;background:var(--surface2);
+         border:1px solid var(--line2);display:grid;place-items:center;margin:0 auto">
+      <svg width="28" height="28" viewBox="0 0 256 256"><use href="#g-coins" fill="#5b6157"/></svg></div>
+    <div style="font-size:11px;color:var(--ink2);margin-top:4px;line-height:1.3">Dự phòng</div>
+  </div>
+<div style="text-align:center;width:78px">
+    <div style="width:52px;height:52px;border-radius:16px;background:var(--surface2);
+         border:1px solid var(--line2);display:grid;place-items:center;margin:0 auto">
+      <svg width="28" height="28" viewBox="0 0 256 256"><use href="#g-suitcase-rolling" fill="#5b6157"/></svg></div>
+    <div style="font-size:11px;color:var(--ink2);margin-top:4px;line-height:1.3">Chuyển nhà</div>
+  </div>
+<div style="text-align:center;width:78px">
+    <div style="width:52px;height:52px;border-radius:16px;background:var(--surface2);
+         border:1px solid var(--line2);display:grid;place-items:center;margin:0 auto">
+      <svg width="28" height="28" viewBox="0 0 256 256"><use href="#g-plant" fill="#5b6157"/></svg></div>
+    <div style="font-size:11px;color:var(--ink2);margin-top:4px;line-height:1.3">Mặc định</div>
+  </div>
+  </div>
+
+  <div class="box">
+    <div class="t">Cách làm (kỹ thuật)</div>
+    <div class="flow" style="margin:8px 0 0">&lt;svg viewBox="0 0 256 256"&gt;
+  &lt;defs&gt;&lt;clipPath id="cp"&gt;
+    &lt;!-- Phosphor vẽ trong khung y = 32..224  (cao 192) --&gt;
+    &lt;!-- y = 32 + 192 × (1 − p)   ·   height = 192 × p --&gt;
+    &lt;rect x="0" y="158.7" width="256" height="65.3"/&gt;   <b>&lt;!-- p = 34% --&gt;</b>
+  &lt;/clipPath&gt;&lt;/defs&gt;
+
+  &lt;use href="#g-car" fill="<b>#d9d2c4</b>"/&gt;                    <b>&lt;!-- lớp xám: toàn bộ --&gt;</b>
+  &lt;g clip-path="url(#cp)"&gt;
+    &lt;use href="#g-car" fill="<b>#3b8841</b>"/&gt;                  <b>&lt;!-- lớp xanh: bị cắt --&gt;</b>
+  &lt;/g&gt;
+&lt;/svg&gt;</div>
+    <p style="margin-top:12px">Hoạt ảnh khi qua mốc: animate <code>y</code> và <code>height</code> của
+    <code>&lt;rect&gt;</code> trong 700ms (ease-out). Rẻ, mượt, không cần thư viện.</p>
+  </div>
+
+  <div class="box w">
+    <div class="t">Ba lưu ý khi làm thật</div>
+    <p><b>1. Chỉ dùng kiểu Fill.</b> Icon nét mảnh (Line/Regular) tô một nửa sẽ ra hình vô nghĩa —
+    chỉ thấy vài đoạn nét đổi màu.</p>
+    <p style="margin-top:9px"><b>2. Lưu <code>slug</code>, không lưu SVG.</b> Cột
+    <code>quy.icon</code> chứa chuỗi kiểu <code>'car'</code>, <code>'house'</code>. Nếu nhét cả SVG
+    vào DB thì đổi bộ icon sau này phải sửa từng dòng dữ liệu.</p>
+    <p style="margin-top:9px"><b>3. Có icon mặc định.</b> Nếu bồ tạo mục tiêu mà không chọn icon →
+    dùng <code>plant</code> (cây). Không để trống, và không tự đoán icon theo tên mục tiêu — đoán sai
+    thì trông ngớ ngẩn hơn là dùng mặc định.</p>
+  </div>
+</div></section>
+
+<!-- ============ SCREENS ============ -->
+<section><div class="wrap">
+  <h2>Ba màn hình khoác da mới</h2>
+  <p class="lead">Nút <b>＋</b> đã to lên 58px và nổi lên trên thanh điều hướng. Các mục
+  <b>Hôm nay / Lịch sử / Quỹ / Khác</b> tăng lên 12,5px in đậm, có icon và nền pill khi đang chọn.</p>
+
+  <div class="screens">
+
+    <!-- 1 -->
+    <div class="unit">
+    <div class="phone">
+      <div class="tbar"><span class="brand">sobo</span><span>Chu kỳ 31/07 – 28/08 · còn 12 ngày 🔔</span></div>
+
+            <!-- 1.880.000đ còn lại ÷ 12 ngày = 156.667đ. Bản đầu ghi 235.000đ —
+           con số đó chỉ đúng nếu còn 8 ngày, tức là nó thuộc một kịch bản khác.
+           Mọi con số trong file này phải thuộc cùng MỘT kịch bản (sửa 24/08/2026). -->
+      <div class="hero-lbl">Hôm nay còn tiêu được</div>
+      <div class="hero">156.667<span class="cur">đ</span></div>
+      <div style="display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink2)">
+        <span class="pill warn">⚠ nhanh hơn nhịp</span>
+        <span>76% ngân sách · mới qua 61% chu kỳ</span>
+      </div>
+
+      <div class="pace">
+        <div class="track"><div class="fill" style="width:76.5%"></div>
+          <div class="marker" style="left:61%"></div>
+          <div class="mlbl" style="left:61%">hôm nay</div></div>
+        <div class="legend"><span>0đ</span><span>ngân sách 8.000.000đ</span></div>
+      </div>
+
+      <div class="tiles">
+        <div class="tile"><div class="l">Đã chi</div><div class="v">6.120.000</div><div class="d">76%</div></div>
+        <div class="tile"><div class="l">Còn lại</div><div class="v">1.880.000</div><div class="d">12 ngày</div></div>
+        <div class="tile"><div class="l">Quỹ dự phòng</div><div class="v">3.200.000</div>
+          <div class="d" style="color:var(--goodtx)">+500.000</div></div>
+      </div>
+
+      <div class="cta"><span>🌿 Đang muốn mua gì đó?</span><b>Cân nhắc giúp →</b></div>
+
+      <div style="font-size:12px;color:var(--muted);margin:16px 0 8px">Ghi nhanh</div>
+      <div class="qa">
+        <div class="qbtn"><div class="ic" style="background:var(--c1-t)"><svg width="22" height="22" fill="none" stroke="var(--c1)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-bowl"/></svg></div><span class="n">Sinh hoạt</span><span class="s">ăn, chợ, thiết yếu</span></div>
+        <div class="qbtn"><div class="ic" style="background:var(--c3-t)"><svg width="22" height="22" fill="none" stroke="var(--c3)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-glass"/></svg></div><span class="n">Giải trí</span><span class="s">đi chơi, bạn bè</span></div>
+        <div class="qbtn"><div class="ic" style="background:var(--c4-t)"><svg width="22" height="22" fill="none" stroke="var(--c4)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-sprout"/></svg></div><span class="n">Đầu tư</span><span class="s">sinh lời</span></div>
+        <div class="qbtn"><div class="ic" style="background:var(--c5-t)"><svg width="22" height="22" fill="none" stroke="var(--c5)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-lipstick"/></svg></div><span class="n">Mĩ phẩm</span><span class="s">skincare</span></div>
+        <div class="qbtn"><div class="ic" style="background:var(--c2-t)"><svg width="22" height="22" fill="none" stroke="var(--c2)" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-book"/></svg></div><span class="n">Phát triển</span><span class="s">học, sách</span></div>
+        <div class="qbtn save"><div class="ic" style="background:#e2efe1"><svg width="22" height="22" fill="none" stroke="#2f6b39" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><use href="#i-jar"/></svg></div><span class="n">Để dành</span><span class="s">không tính là chi</span></div>
+      </div>
+
+      <div class="card" style="display:flex;align-items:center;gap:14px">
+        <svg width="58" height="58" viewBox="0 0 60 60" aria-label="Hoa cúc 4 trên 7 cánh">
+          <g><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#fff" stroke="#d9d2c4"/></g>
+          <g transform="rotate(51.4 30 30)"><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#fff" stroke="#d9d2c4"/></g>
+          <g transform="rotate(102.9 30 30)"><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#fff" stroke="#d9d2c4"/></g>
+          <g transform="rotate(154.3 30 30)"><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#efeadf"/></g>
+          <g transform="rotate(205.7 30 30)"><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#fff" stroke="#d9d2c4"/></g>
+          <g transform="rotate(257.1 30 30)"><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#efeadf"/></g>
+          <g transform="rotate(308.6 30 30)"><ellipse cx="30" cy="14" rx="5.6" ry="11.5" fill="#efeadf"/></g>
+          <circle cx="30" cy="30" r="7.5" fill="#e8c34a"/>
+        </svg>
+        <div><div style="font-size:13.5px;font-weight:600">Tuần này 4/7 cánh</div>
+          <div style="font-size:12.5px;color:var(--ink2)">Còn 1 ngày nữa là hoa nở đủ 🌼</div></div>
+      </div>
+
+      <div class="nav">
+        <div class="it on"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-home"/></svg>Hôm nay</div>
+        <div class="it"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-clock"/></svg>Lịch sử</div>
+        <div class="plusw"><div class="plus">＋</div></div>
+        <div class="it"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-leafpot"/></svg>Quỹ</div>
+        <div class="it"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-dots"/></svg>Khác</div>
+      </div>
+    </div>
+    <p class="cap"><b>① Hôm nay.</b> Nút <b>“Để dành”</b> nằm ngay cạnh 5 danh mục — cảm giác giống
+    hệt, nhưng dữ liệu bên dưới là <code>chuyen_vao_quy</code> nên không bị tính vào tổng chi.
+    Số liệu đổi theo thu nhập thật 9–10tr bạn cho biết.</p>
+    </div>
+
+    <!-- 2 -->
+    <div class="unit">
+    <div class="phone">
+      <div class="tbar"><span>Chu kỳ 31/07 – 28/08</span><span>◀ ▶</span></div>
+
+      <div class="card" style="margin-top:0">
+        <h4>Chi theo danh mục</h4>
+        <div class="sub">Lát bánh giữ đúng thứ tự slot đã kiểm định mù màu</div>
+        <svg viewBox="0 0 200 200" width="100%" height="192" role="img"
+             aria-label="Biểu đồ tròn chi theo danh mục, tổng 6.120.000 đồng">
+          <g transform="rotate(-90 100 100)" fill="none" stroke-width="17">
+            <circle class="sl" cx="100" cy="100" r="72" stroke="var(--c1)"
+              stroke-dasharray="242.3 210.1" stroke-dashoffset="0" data-t="Sinh hoạt · 3.310.000đ · 54,0%"></circle>
+            <circle class="sl" cx="100" cy="100" r="72" stroke="var(--c2)"
+              stroke-dasharray="31.5 420.9" stroke-dashoffset="-244.3" data-t="Phát triển bản thân · 450.000đ · 7,4%"></circle>
+            <circle class="sl" cx="100" cy="100" r="72" stroke="var(--c3)"
+              stroke-dasharray="103.9 348.5" stroke-dashoffset="-277.8" data-t="Giải trí · 1.430.000đ · 23,4%"></circle>
+            <circle class="sl" cx="100" cy="100" r="72" stroke="var(--c4)"
+              stroke-dasharray="22.4 430.0" stroke-dashoffset="-383.6" data-t="Đầu tư · 330.000đ · 5,4%"></circle>
+            <circle class="sl" cx="100" cy="100" r="72" stroke="var(--c5)"
+              stroke-dasharray="42.3 410.1" stroke-dashoffset="-408.1" data-t="Mĩ phẩm · 600.000đ · 9,8%"></circle>
+          </g>
+          <text x="100" y="88" text-anchor="middle" font-size="11" fill="#8d9186"
+                font-family="Be Vietnam Pro, sans-serif">đã chi</text>
+          <text x="100" y="113" text-anchor="middle" font-size="29" font-weight="600" fill="#20241f"
+                font-family="Be Vietnam Pro, sans-serif" letter-spacing="-0.8">6,12tr</text>
+          <text x="100" y="128" text-anchor="middle" font-size="10.5" fill="#8d9186"
+                font-family="Be Vietnam Pro, sans-serif">6.120.000đ</text>
+        </svg>
+
+        <div class="ll">
+          <div class="r"><span class="dot" style="background:var(--c1-t)"><svg width="14" height="14" fill="none" stroke="var(--c1)" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><use href="#i-bowl"/></svg></span><span class="nm">Sinh hoạt</span><span class="vl">3.310.000đ</span><span class="pc">54,0%</span></div>
+          <div class="r"><span class="dot" style="background:var(--c3-t)"><svg width="14" height="14" fill="none" stroke="var(--c3)" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><use href="#i-glass"/></svg></span><span class="nm">Giải trí</span><span class="vl">1.430.000đ</span><span class="pc">23,4%</span></div>
+          <div class="r"><span class="dot" style="background:var(--c5-t)"><svg width="14" height="14" fill="none" stroke="var(--c5)" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><use href="#i-lipstick"/></svg></span><span class="nm">Mĩ phẩm</span><span class="vl">600.000đ</span><span class="pc">9,8%</span></div>
+          <div class="r"><span class="dot" style="background:var(--c2-t)"><svg width="14" height="14" fill="none" stroke="var(--c2)" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><use href="#i-book"/></svg></span><span class="nm">Phát triển bản thân</span><span class="vl">450.000đ</span><span class="pc">7,4%</span></div>
+          <div class="r"><span class="dot" style="background:var(--c4-t)"><svg width="14" height="14" fill="none" stroke="var(--c4)" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><use href="#i-sprout"/></svg></span><span class="nm">Đầu tư</span><span class="vl">330.000đ</span><span class="pc">5,4%</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h4>So với chu kỳ trước</h4>
+        <div class="sub">Chênh lệch từng danh mục · mốc 0 ở giữa</div>
+        <svg viewBox="0 0 360 168" width="100%" height="168" role="img"
+             aria-label="Chênh lệch chi tiêu so với chu kỳ trước">
+          <line x1="190" y1="4" x2="190" y2="140" stroke="#cfc6b5"/>
+          <g font-size="11" fill="#5b6157" font-family="Be Vietnam Pro, sans-serif">
+            <text x="0" y="20">Sinh hoạt</text><text x="0" y="47">Giải trí</text>
+            <text x="0" y="74">Mĩ phẩm</text><text x="0" y="101">Phát triển</text>
+            <text x="0" y="128">Đầu tư</text>
+          </g>
+          <rect class="bar" x="190" y="8"   width="90" height="16" rx="4" fill="#d03b3b" data-t="Sinh hoạt: +520.000đ"></rect>
+          <rect class="bar" x="190" y="35"  width="52" height="16" rx="4" fill="#d03b3b" data-t="Giải trí: +300.000đ"></rect>
+          <rect class="bar" x="155" y="62"  width="35" height="16" rx="4" fill="#0ca30c" data-t="Mĩ phẩm: −200.000đ"></rect>
+          <rect class="bar" x="190" y="89"  width="14" height="16" rx="4" fill="#d03b3b" data-t="Phát triển bản thân: +80.000đ"></rect>
+          <rect class="bar" x="179" y="116" width="11" height="16" rx="4" fill="#0ca30c" data-t="Đầu tư: −60.000đ"></rect>
+          <g font-size="11" font-weight="600" fill="#20241f" text-anchor="end"
+             font-family="Be Vietnam Pro, sans-serif" style="font-variant-numeric:tabular-nums">
+            <text x="358" y="20">+520k</text><text x="358" y="47">+300k</text>
+            <text x="358" y="74">−200k</text><text x="358" y="101">+80k</text><text x="358" y="128">−60k</text>
+          </g>
+          <text x="190" y="156" text-anchor="middle" font-size="10.5" fill="#8d9186"
+                font-family="Be Vietnam Pro, sans-serif">0đ</text>
+        </svg>
+        <div style="display:flex;gap:14px;font-size:11.5px;color:var(--ink2);margin-top:6px">
+          <span><i style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#d03b3b;margin-right:5px"></i>Nhiều hơn kỳ trước</span>
+          <span><i style="display:inline-block;width:10px;height:10px;border-radius:3px;background:#0ca30c;margin-right:5px"></i>Ít hơn kỳ trước</span>
+        </div>
+      </div>
+
+      <div class="nav">
+        <div class="it on"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-home"/></svg>Hôm nay</div>
+        <div class="it"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-clock"/></svg>Lịch sử</div>
+        <div class="plusw"><div class="plus">＋</div></div>
+        <div class="it"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-leafpot"/></svg>Quỹ</div>
+        <div class="it"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-dots"/></svg>Khác</div>
+      </div>
+    </div>
+    <p class="cap"><b>② Chu kỳ này.</b> Icon nhỏ trong danh sách chú giải làm nhiệm vụ kép: vừa là
+    “nhãn hiện rõ” bù cho màu Nghệ tương phản thấp, vừa giúp nhận diện không cần đọc chữ.</p>
+    </div>
+
+    <!-- 5 -->
+    <div class="unit">
+    <div class="phone">
+      <div class="tbar"><span>Quỹ &amp; Mục tiêu</span><span>＋</span></div>
+
+      <div class="hero-lbl">Tổng đang để dành</div>
+      <div class="hero">65.600.000<span class="cur">đ</span></div>
+      <div><span class="pill crit">● đang nợ quỹ 800.000đ</span></div>
+
+      <div class="card">
+        <h4>Quỹ dự phòng</h4>
+        <div class="sub">Không có đích · cho phép mượn</div>
+        <div class="mt"><div class="top"><span>Số dư</span><span class="r">3.200.000đ</span></div>
+          <div class="track"><div class="fill" style="width:80%;background:var(--c1)"></div></div></div>
+        <div style="background:#fbe9e9;border:1px solid #f2d5d5;border-radius:11px;padding:9px 11px;
+             font-size:12.5px;color:#8c1f1f;margin-top:9px">
+          Chu kỳ 06 mượn <b>800.000đ</b> · trả 3 tháng · mỗi kỳ <b>267.000đ</b> · còn 2 kỳ
+        </div>
+      </div>
+
+      <div class="card">
+        <h4>Mua xe · 34%</h4>
+        <div class="sub">Đích 66.000.000đ · 🔒 khoá, không cho mượn</div>
+        <div style="display:flex;gap:14px;align-items:center;margin:8px 0 4px">
+          <svg width="74" height="74" viewBox="0 0 256 256" aria-label="Mục tiêu Mua xe, đã đạt 34%">
+            <defs><clipPath id="cp-xe"><rect x="0" y="158.7" width="256" height="65.3"/></clipPath></defs>
+            <use href="#g-car" fill="#d9d2c4"/>
+            <g clip-path="url(#cp-xe)"><use href="#g-car" fill="#3b8841"/></g>
+          </svg>
+          <div style="font-size:12.5px;color:var(--ink2)">Đã có <b>22.400.000đ</b><br>
+            Còn <b>43.600.000đ</b><br>Với nhịp hiện tại: <b>tháng 2/2028</b></div>
+        </div>
+        <div class="mt"><div class="track"><div class="fill" style="width:34%;background:var(--c1)"></div></div></div>
+      </div>
+
+      <div class="card">
+        <h4>Mua nhà · 8%</h4>
+        <div class="sub">Đích 500.000.000đ · 🔒 khoá</div>
+        <div style="display:flex;gap:14px;align-items:center;margin:8px 0 4px">
+          <svg width="74" height="74" viewBox="0 0 256 256" aria-label="Mục tiêu Mua nhà, đã đạt 8%">
+            <defs><clipPath id="cp-nha"><rect x="0" y="208.6" width="256" height="15.4"/></clipPath></defs>
+            <use href="#g-house" fill="#d9d2c4"/>
+            <g clip-path="url(#cp-nha)"><use href="#g-house" fill="#3b8841"/></g>
+          </svg>
+          <div style="font-size:12.5px;color:var(--ink2)">Đã có <b>40.000.000đ</b><br>
+            Còn <b>460.000.000đ</b><br>Còn xa — nhưng mái nhà đã bắt đầu xanh 🌱</div>
+        </div>
+        <div class="mt"><div class="track"><div class="fill" style="width:8%;background:var(--c1)"></div></div></div>
+      </div>
+
+      <div class="nav">
+        <div class="it"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-home"/></svg>Hôm nay</div>
+        <div class="it"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-clock"/></svg>Lịch sử</div>
+        <div class="plusw"><div class="plus">＋</div></div>
+        <div class="it on"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-leafpot"/></svg>Quỹ</div>
+        <div class="it"><svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><use href="#i-dots"/></svg>Khác</div>
+      </div>
+    </div>
+    <p class="cap"><b>⑤ Quỹ &amp; Mục tiêu.</b> <b>Icon là chính thứ bồ muốn</b> — xe thì hình xe,
+    nhà thì hình nhà — tô xanh dần từ dưới lên theo %. Phần trên còn xám. Nhìn ra tiến độ
+    <b>mà không cần đọc số</b>, và mỗi mục tiêu có bản sắc riêng ngay từ danh sách.</p>
+    </div>
+  </div>
+</div></section>
+
+<!-- ============ TRẢ LỜI 5 CÂU ============ -->
+<section><div class="wrap">
+  <h2>Trả lời 5 câu hỏi của bạn</h2>
+
+  <h3>① Ngày lương — ngày làm việc cuối tháng, nhưng cho sửa tay</h3>
+  <p>Quy tắc tự tính: lấy <b>ngày cuối tháng</b>; nếu rơi vào Chủ nhật thì lùi 2 ngày, Thứ bảy thì
+  lùi 1 ngày. <b>Không</b> làm bảng ngày lễ Việt Nam — lễ đổi mỗi năm, bảng đó sẽ mục và sai âm thầm.
+  Thay vào đó cho bồ sửa bằng một chạm, và app học theo.</p>
+  <div class="flow">chu_ky(ngay_bat_dau_du_kien, <b>ngay_bat_dau_thuc_te</b>, ngay_ket_thuc, so_ngay)
+
+Quy tắc ranh giới (bắt buộc, chống hở &amp; chồng lấn):
+  ngày bắt đầu chu kỳ N+1  =  ngày kết thúc chu kỳ N  +  1
+
+Khi bồ sửa ngày lương thực tế (VD lương về sớm 3 ngày do lễ):
+  → chu kỳ TRƯỚC tự co lại cho khít  (31 ngày → 28 ngày)
+  → giao dịch trong 3 ngày đó tự chuyển sang chu kỳ mới
+  → hiện thông báo: <b>"Đã chuyển 4 giao dịch sang chu kỳ mới"</b>
+  → ghi su_kien CYCLE_BOUNDARY_CHANGED</div>
+  <div class="box w">
+    <div class="t">Một hệ quả dễ gây hoang mang, phải xử lý ở UI</div>
+    <p>Chu kỳ dài 28–34 ngày tuỳ tháng. Con số “hôm nay còn tiêu được” chia cho <b>số ngày còn lại
+    thật</b>, nên tháng ngắn sẽ thấy con số nhỏ hơn dù không tiêu nhiều hơn. Cần ghi rõ ngay dưới
+    tiêu đề: <i>“Chu kỳ này 28 ngày — ngắn hơn 3 ngày vì lương về sớm”</i>. Không có dòng này bồ sẽ
+    tưởng app tính sai.</p>
+  </div>
+
+  <h3>② Quỹ dự phòng — tự điền sau, và cần một loại bút toán riêng</h3>
+  <p>Onboarding <b>không hỏi</b> về quỹ. Quỹ bắt đầu 0đ, có nút “Điền số dư hiện có” bấm lúc nào
+  cũng được. Nhưng khoản đó phải là bút toán loại <code>so_du_ban_dau</code>, <b>không phải</b>
+  <code>chuyen_vao_quy</code> — nếu không, tỷ lệ để dành của chu kỳ đầu sẽ vọt lên vô lý
+  (kiểu “tháng này bạn để dành được 340% thu nhập 🎉”) và mọi biểu đồ so sánh về sau bị méo bởi
+  một đỉnh giả.</p>
+
+  <h3>③ Kỳ hạn trả nợ quỹ — 1 / 3 / 6 tháng, trần 15% thu nhập</h3>
+  <p>Thu nhập 9–10tr. Lấy <b>15% của thu nhập thấp nhất trong 3 chu kỳ gần nhất</b> (an toàn hơn lấy
+  trung bình) làm trần mỗi kỳ. Với 9tr ⇒ trần <b>1.350.000đ/kỳ</b>.</p>
+  <div class="tw"><table>
+    <thead><tr><th>Số nợ</th><th>1 tháng</th><th>3 tháng</th><th>6 tháng</th><th>App mặc định chọn</th></tr></thead>
+    <tbody>
+      <tr><td><b>800.000đ</b></td><td>800.000 ✅</td><td>267.000 ✅</td><td>133.000 ✅</td><td><b>1 tháng</b> — kỳ ngắn nhất còn hợp lệ</td></tr>
+      <tr><td><b>2.000.000đ</b></td><td>2.000.000 ❌</td><td>667.000 ✅</td><td>333.000 ✅</td><td><b>3 tháng</b></td></tr>
+      <tr><td><b>4.500.000đ</b></td><td>❌</td><td>1.500.000 ❌</td><td>750.000 ✅</td><td><b>6 tháng</b></td></tr>
+      <tr><td><b>9.000.000đ</b></td><td>❌</td><td>❌</td><td>1.500.000 ❌</td><td><b>Trả linh hoạt</b> — xem dưới</td></tr>
+    </tbody>
+  </table></div>
+  <div class="box k">
+    <div class="t">Cần lựa chọn thứ tư, nếu không app sẽ kẹt</div>
+    <p>Nếu nợ <b>vượt 8.100.000đ</b> thì không kỳ hạn nào trong ba lựa chọn hợp lệ. Phải có
+    <b>“Trả linh hoạt”</b>: mỗi kỳ trả đúng 15% thu nhập cho tới hết, số kỳ tự tính (9tr ⇒ 7 kỳ).
+    Đây là lối thoát bắt buộc.</p>
+    <p style="margin-top:9px"><b>Hai quy tắc UI:</b> (1) lựa chọn không hợp lệ thì <b>hiện mờ kèm lý
+    do</b> (“1 tháng = 2.000.000đ/kỳ, vượt trần 1.350.000đ”) chứ không ẩn đi — bồ cần hiểu vì sao.
+    (2) Nợ dưới <b>300.000đ</b> thì <b>không bày ba lựa chọn</b>, trả luôn trong 1 kỳ — đừng bắt
+    quyết định chuyện nhỏ.</p>
+  </div>
+
+  <h3>④ Để nguội — neo theo % thu nhập, không theo số tiền cứng</h3>
+  <p>Bậc tôi đề xuất lúc trước (500k / 3tr) là neo theo số tiền tuyệt đối. Với thu nhập 9–10tr thì
+  <b>3 triệu ≈ 1/3 tháng lương</b> — quá cao để chỉ nguội 48h. Nên neo theo <b>% thu nhập</b>,
+  vì như vậy ngưỡng tự giãn ra khi thu nhập bồ tăng:</p>
+  <div class="tw"><table>
+    <thead><tr><th>Số tiền</th><th>Quy ra % thu nhập</th><th>Với 9tr</th><th>Để nguội</th></tr></thead>
+    <tbody>
+      <tr><td>Nhỏ</td><td>&lt; 5%</td><td>&lt; 450.000đ</td><td><b>24 giờ</b></td></tr>
+      <tr><td>Vừa</td><td>5 – 20%</td><td>450.000 – 1.800.000đ</td><td><b>48 giờ</b></td></tr>
+      <tr><td>Lớn</td><td>&gt; 20%</td><td>&gt; 1.800.000đ</td><td><b>7 ngày</b></td></tr>
+    </tbody>
+  </table></div>
+  <p style="font-size:13.5px;color:var(--ink2)">Bồ vẫn chỉnh tay được ở mỗi lần cân nhắc, và có nút
+  “Tôi quyết luôn” để bỏ qua — <b>không được cưỡng chế</b>. Nếu cơ chế này trở thành rào cản thì bồ
+  sẽ ngừng dùng nó, và mất luôn tính năng hay nhất của app.</p>
+
+  <h3>⑤ “Nhập lại dữ liệu lịch sử” — làm rõ chỗ bạn thắc mắc</h3>
+  <p>Có <b>hai chuyện khác nhau</b> mà từ “lịch sử” đang gộp lại:</p>
+  <div class="tw"><table>
+    <thead><tr><th style="width:28%">Chuyện</th><th>Nghĩa là gì</th><th style="width:18%">Cần làm gì</th></tr></thead>
+    <tbody>
+      <tr><td><b>App tự lưu lịch sử</b><br><span style="color:var(--muted);font-size:12.5px">= điều bạn mô tả</span></td>
+        <td>Từ lúc bắt đầu dùng, <b>mọi giao dịch được lưu vĩnh viễn</b>. Chu kỳ đóng lại thì đóng
+        băng thành snapshot. Màn Lịch sử đọc thẳng từ đó, lọc theo tuần/tháng/quý/năm, chạm vào
+        tháng cũ là thấy lại dashboard tháng đó.</td>
+        <td><b>Không phải làm gì.</b> Tự động 100%</td></tr>
+      <tr><td><b>Nhập lại dữ liệu quá khứ</b><br><span style="color:var(--muted);font-size:12.5px">= câu tôi hỏi</span></td>
+        <td>Những tháng <b>trước khi có app</b> — tháng 5, 6, 7 chẳng hạn. Dữ liệu đó
+        <b>không tồn tại</b> trong máy vì lúc ấy chưa có app. Muốn xem thì phải ngồi mở lịch sử
+        Momo/sao kê rồi <b>gõ tay từng khoản</b>.</td>
+        <td>Ngồi nhập tay nhiều giờ</td></tr>
+    </tbody>
+  </table></div>
+  <p><b>Bạn đã trả lời rồi:</b> bắt đầu dùng từ đầu tháng, không cần quá khứ. ⇒ <b>Bỏ khỏi phạm vi.</b>
+  Lộ trình giảm thêm 8–15h.</p>
+  <div class="box w">
+    <div class="t">Nhưng có một hệ quả phải xử lý: ba tháng đầu màn Lịch sử sẽ trống</div>
+    <p>Biểu đồ “8 chu kỳ gần nhất” lúc mới dùng chỉ có <b>một cột</b>. Biểu đồ “so với chu kỳ trước”
+    thì <b>không có gì để so</b>. Nếu để mặc, bồ mở ra thấy trống trơn sẽ nghĩ app hỏng và không
+    quay lại.</p>
+    <p style="margin-top:9px"><b>Phải thiết kế màn hình trống tử tế</b> — một minh hoạ cây non
+    (unDraw/Storyset) + câu <i>“Chu kỳ đầu tiên đang chạy. Sang tháng 9 sẽ có biểu đồ so sánh đầu
+    tiên 🌱”</i>. Đây là một việc thật, có trong lộ trình, không phải chi tiết vặt.</p>
+  </div>
+</div></section>
+
+<!-- ============ TỔNG HỢP THAY ĐỔI ============ -->
+<section><div class="wrap">
+  <h2>Bảy góp ý UI/UX — đã áp thế nào</h2>
+  <div class="tw"><table>
+    <thead><tr><th style="width:26%">Bạn muốn</th><th>Đã làm</th></tr></thead>
+    <tbody>
+      <tr><td><b>1.</b> Dễ thương hơn, cây cỏ hoa lá</td>
+        <td>Nền kem + cát ấm + sage; ẩn dụ thống nhất <b>hoa nở / cây lớn / luống đất</b>; bo góc lớn (16–30px); đổ bóng ngả xanh lá thay vì xám</td></tr>
+      <tr><td><b>2.</b> Icon danh mục chi tiết, dễ thương</td>
+        <td>Icon trong ô bo tròn 40px, nền màu danh mục pha loãng 10%. Thư viện đề xuất: <b>Phosphor Duotone</b> (MIT, miễn phí). Không dùng emoji làm icon danh mục</td></tr>
+      <tr><td><b>3.</b> Màu thiên nhiên, chill, hơi sang</td>
+        <td>Tách <b>hai lớp màu</b> — lớp giao diện dịu (92% màn hình) + lớp dữ liệu đã kiểm định (chỉ ở ô nhỏ &amp; vành donut). Vàng đồng chỉ làm nét mảnh</td></tr>
+      <tr><td><b>4.</b> Font đẹp hơn</td>
+        <td><b>Be Vietnam Pro</b> cho toàn bộ + <b>Fraunces</b> cho tên app/tiêu đề. Ba lựa chọn khác kèm mẫu render thật ở trên</td></tr>
+      <tr><td><b>5.</b> Nhịp ghi chép → hoa cúc trắng</td>
+        <td>7 cánh = 7 ngày; đủ 5 cánh thì nhuỵ vàng rực; vườn 8 tuần ở màn Lịch sử; cánh bung 400ms khi ghi xong</td></tr>
+      <tr><td><b>6.</b> Nút ＋ to hơn</td>
+        <td>34px → <b>58px</b>, nổi lên trên thanh nav 26px, có viền kem 5px + bóng xanh lá</td></tr>
+      <tr><td><b>7.</b> Mục lục to &amp; đậm hơn</td>
+        <td>10,5px → <b>12,5px</b>, độ đậm 600 (mục đang chọn 700), thêm icon 22px, mục đang chọn có nền pill xanh lá nhạt</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="box">
+    <div class="t">Một cảnh báo nhỏ về “to hơn”</div>
+    <p>Thanh nav to lên và nút ＋ nổi cao sẽ <b>ăn mất ~26px chiều cao nội dung</b>. Trên iPhone màn
+    nhỏ (SE, 13 mini), 6 nút ghi nhanh có thể bị đẩy xuống dưới nếp gấp. Cần thử trên máy thật của
+    bồ ở pha 1 — nếu chật thì rút gọn phần thẻ số liệu, <b>không rút gọn nút ghi nhanh</b>, vì đó là
+    thứ quan trọng nhất màn hình.</p>
+  </div>
+</div></section>
+
+<footer><div class="wrap">
+  sobo · vòng trao đổi 3 · 17/08/2026 · số liệu minh hoạ theo thu nhập 9–10tr.<br>
+  Bảng màu dữ liệu đã chạy kiểm định tự động trên nền kem <code>#faf7f2</code>, gồm cả cặp nối vòng
+  của biểu đồ tròn: PASS dải sáng · PASS ngưỡng bão hoà · PASS mù màu (ΔE 9,0) ·
+  PASS thị giác thường (ΔE 16,8) · màu Nghệ cần nhãn chữ đi kèm.
+</div></footer>
+
+<script>
+const tt=document.getElementById('tt');
+document.querySelectorAll('[data-t]').forEach(el=>{
+  el.addEventListener('mousemove',e=>{
+    tt.textContent=el.getAttribute('data-t');tt.style.opacity='1';
+    const w=tt.getBoundingClientRect().width;
+    tt.style.left=Math.max(8,Math.min(e.clientX+14,innerWidth-w-8))+'px';
+    tt.style.top=Math.max(8,e.clientY-34)+'px';});
+  el.addEventListener('mouseleave',()=>tt.style.opacity='0');
+});
+</script>
+</body>
+</html>

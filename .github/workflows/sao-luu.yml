@@ -1,0 +1,132 @@
+# Sao lưu hằng tuần — §5 "Bắt buộc ở Pha 0", trả nợ ngày 23/08/2026.
+#
+# Vì sao cần: Supabase gói miễn phí chỉ giữ backup 7 ngày. Quá bảy ngày mà DB
+# hỏng thì không còn gì để khôi phục từ phía Supabase. §1 xếp mất dữ liệu là một
+# trong hai cách dự án chết.
+#
+# Vì sao là GitHub Actions chứ không phải Cloudflare Cron: repo đã có sẵn, không
+# thêm hạ tầng nào, và lịch sử chạy xem được ngay trên web — thứ quan trọng nhất
+# với một cái cron mà hỏng thì im lặng.
+
+name: Sao lưu hằng tuần
+
+on:
+  schedule:
+    # 20:00 UTC thứ Bảy = 03:00 Chủ Nhật giờ Việt Nam (UTC+7).
+    # §14 quy ước 2: cron KHAI BÁO BẰNG UTC, ghi chú giờ VN bên cạnh. Viết thẳng
+    # "0 3 * * 0" thì nó chạy lúc 10 giờ sáng giờ VN.
+    - cron: '0 20 * * 6'
+  # Bấm chạy tay được — cần cho lúc kiểm thử và lúc muốn có bản mới ngay.
+  workflow_dispatch:
+
+jobs:
+  sao-luu:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          # Node 24 chạy thẳng .ts, không cần bước biên dịch. Script sao lưu cố ý
+          # không có phụ thuộc ngoài — thứ phải `npm install` mới chạy được là thứ
+          # sẽ hỏng vào đúng lúc cần đến nó nhất.
+          node-version: '24'
+
+      # Kiểm tra TRƯỚC khi chạy script. Không có bước này thì secret đặt thiếu sẽ
+      # hiện ra dưới dạng "không đọc được .env" — đúng về mặt kỹ thuật nhưng chỉ
+      # về sai hướng hoàn toàn so với nguyên nhân thật.
+      #
+      # GitHub thay secret không tồn tại bằng CHUỖI RỖNG, không báo lỗi gì cả, nên
+      # phải tự kiểm.
+      - name: Kiểm tra Secrets
+        env:
+          URL: ${{ secrets.SUPABASE_URL }}
+          KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          MAT_KHAU: ${{ secrets.MAT_KHAU_SAO_LUU }}
+        run: |
+          thieu=""
+          [ -z "$URL" ] && thieu="$thieu SUPABASE_URL"
+          [ -z "$KEY" ] && thieu="$thieu SUPABASE_SERVICE_ROLE_KEY"
+          [ -z "$MAT_KHAU" ] && thieu="$thieu MAT_KHAU_SAO_LUU"
+          if [ -n "$thieu" ]; then
+            echo "::error::Thiếu Secret:$thieu"
+            echo ""
+            # GitHub che MỌI chuỗi trùng với giá trị của một secret nào đó. Nên
+            # nếu tên ở trên hiện thành ***, đó không phải lỗi hiển thị mà là
+            # bằng chứng: chính chuỗi đó đang được lưu làm GIÁ TRỊ của một secret
+            # — tức là hai ô Name và Secret bị dán ngược.
+            echo "Nếu tên phía trên hiện thành ***, nghĩa là bạn đã dán TÊN BIẾN"
+            echo "vào ô Secret. Ô trên là tên, ô dưới là giá trị thật."
+            echo ""
+            echo "Vào: repo → Settings → Secrets and variables → Actions"
+            echo "Bấm tab \"Secrets\" (KHÔNG phải tab \"Variables\")"
+            echo "Bấm \"New repository secret\" (KHÔNG phải Environment secret)"
+            echo "Tên phải viết HOA và đúng từng ký tự:$thieu"
+            exit 1
+          fi
+          echo "Đủ ba Secret · URL ${#URL} ký tự · khoá ${#KEY} ký tự · mật khẩu ${#MAT_KHAU} ký tự"
+
+      - name: Dump toàn bộ DB lên Supabase Storage
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: node scripts/backup.ts
+
+      # ── Mã hoá trước khi rời khỏi máy chạy ────────────────────────────────
+      #
+      # Bản trên Supabase Storage nằm trong thùng private nên không cần bước này.
+      # Bản dưới đây thì KHÁC HẲN: nó rời khỏi hạ tầng của mình và nằm 90 ngày
+      # trên máy chủ GitHub, nơi bất kỳ token nào đọc được repo cũng tải về được.
+      # Mà nội dung là toàn bộ giao dịch, thu nhập, quỹ và sổ tiết kiệm của cả
+      # hai người — đọc được bằng Notepad nếu để JSON thô.
+      #
+      # aes-256-cbc + PBKDF2 600.000 vòng: con số vòng lặp là thứ quyết định, nó
+      # làm việc dò mật khẩu chậm đi hàng trăm nghìn lần. Bỏ `-pbkdf2` thì openssl
+      # rơi về hàm dẫn xuất khoá đời 1999, dò được nhanh gấp nhiều lần.
+      - name: Mã hoá bản dump
+        env:
+          MAT_KHAU: ${{ secrets.MAT_KHAU_SAO_LUU }}
+        run: |
+          set -euo pipefail
+          for f in backups/*.json; do
+            openssl enc -aes-256-cbc -pbkdf2 -iter 600000 -salt \
+              -in "$f" -out "$f.enc" -pass env:MAT_KHAU
+
+            # TỰ KIỂM — giải mã lại ngay và so với bản gốc.
+            #
+            # Không có bước này thì một bản sao lưu hỏng vẫn báo xanh, và chỉ lộ
+            # ra đúng vào ngày cần dùng tới nó. §1 xếp mất dữ liệu là một trong
+            # hai cách dự án chết; một bản sao lưu không phục hồi được còn tệ hơn
+            # không có, vì nó cho cảm giác an toàn giả.
+            openssl enc -d -aes-256-cbc -pbkdf2 -iter 600000 \
+              -in "$f.enc" -out "$f.thu" -pass env:MAT_KHAU
+            if ! cmp -s "$f" "$f.thu"; then
+              echo "::error::Giải mã lại KHÔNG khớp bản gốc: $f"
+              exit 1
+            fi
+            rm "$f.thu"
+
+            goc=$(wc -c < "$f")
+            ma=$(wc -c < "$f.enc")
+            echo "${f##*/} · $goc byte → $ma byte · giải mã lại khớp ✓"
+
+            # Xoá bản THÔ để chắc chắn nó không lọt vào artifact.
+            rm "$f"
+          done
+
+      # Giữ ở đây 90 ngày làm bản thứ hai, phòng khi chính Supabase Storage cũng
+      # mất — Storage nằm CÙNG project với database nên nó không chống được ca
+      # xoá nhầm cả project.
+      #
+      # Chỉ tải lên file .enc. Bản dump thô cũng KHÔNG được commit vào repo
+      # (.gitignore đã chặn).
+      #
+      # ⚠️ MẤT MẬT KHẨU LÀ MẤT LUÔN BẢN NÀY. Không có đường khôi phục nào khác —
+      # đó là cái giá của việc mã hoá đúng cách. Cất `MAT_KHAU_SAO_LUU` ở nơi
+      # KHÁC với GitHub và khác với máy tính đang dùng.
+      - name: Giữ thêm một bản ngoài Supabase
+        uses: actions/upload-artifact@v4
+        with:
+          name: sao-luu-${{ github.run_number }}
+          path: backups/*.json.enc
+          retention-days: 90

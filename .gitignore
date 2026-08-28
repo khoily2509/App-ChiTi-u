@@ -1,0 +1,40 @@
+# Bí mật — KHÔNG BAO GIỜ commit
+.env
+.env.*
+!.env.example
+*.key
+.dev.vars
+
+# Phụ thuộc & build
+node_modules/
+dist/
+dist-ssr/
+.wrangler/
+*.local
+
+# Test & cache
+coverage/
+.vite/
+*.tsbuildinfo
+
+# Hệ điều hành & editor
+.DS_Store
+Thumbs.db
+desktop.ini
+.idea/
+.vscode/*
+!.vscode/extensions.json
+
+# Log
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-error.log*
+
+# Bản dump backup tải về máy để thử phục hồi — không đưa lên repo
+# (dữ liệu tài chính cá nhân của bồ)
+backups/
+*.dump.json
+
+# File gộp tạm để dán tay vào Supabase SQL Editor — bản gốc nằm ở supabase/migrations/
+DAN-VAO-SQL-EDITOR.sql

@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!--
+  MOCKUP v3 — BA NỀN BẦU TRỜI THEO KHUNG GIỜ
+
+  Bổ sung cho mockup-v2-thien-nhien.html, KHÔNG thay thế nó. v2 chốt bảng màu,
+  font, icon và bố cục ba màn; file này chỉ chốt phần NỀN.
+
+  Trước đây file này chỉ tồn tại dưới dạng artifact đã publish và một bản trong
+  thư mục tạm — tức là chưa từng vào repo. Khôi mở mockup v2 tìm nền bầu trời
+  không thấy (23/08/2026), và đó là lúc lộ ra chuyện đó. Đưa vào repo để nó
+  được version-control như mọi bản vẽ khác.
+
+  ⚠️ Khi dựng thật: KHÔNG bê nguyên filter: blur() của mây trong file này. Blur
+  là bộ lọc chạy mỗi khung hình lúc cuộn. Vẽ mây bằng radial-gradient mềm cho ra
+  cùng hiệu ứng mà máy gần như không phải tính gì. Khôi đã chốt nền TĨNH để tối
+  ưu tốc độ (22/08/2026).
+-->
+<title>Ba Bầu Trời</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600&family=Fraunces:opsz,wght@9..144,400;600&display=swap">
+
+<style>
+/* Fraunces của Google CDN KHÔNG có glyph tiếng Việt cho ầ (U+1EA7) và ồ (U+1ED3)
+   — trình duyệt phải rơi về font thay thế và vẽ dấu huyền rời ra khỏi chữ, nên
+   "Ba bầu trời" hiện thành "Ba bâ`u trời". App KHÔNG dính lỗi này vì Pha 0 đã tự
+   host bản có tiếng Việt. Trỏ mockup sang đúng bộ font của app để bản vẽ và bản
+   thật giống nhau theo cấu tạo, không phải nhờ may mắn. (Phát hiện 23/08/2026,
+   khi Khôi mở mockup và thấy tên app hiển thị sai.) */
+@font-face {
+  font-family: 'Fraunces';
+  font-weight: 600;
+  src: url('web/public/fonts/fraunces-600-vi.woff2') format('woff2');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Be Vietnam Pro';
+  font-weight: 400;
+  src: url('web/public/fonts/be-vietnam-pro-400-vi.woff2') format('woff2');
+  font-display: swap;
+}
+@font-face {
+  font-family: 'Be Vietnam Pro';
+  font-weight: 600;
+  src: url('web/public/fonts/be-vietnam-pro-600-vi.woff2') format('woff2');
+  font-display: swap;
+}
+  :root {
+    --ground: #f4f2f8;
+    --surface: #ffffff;
+    --surface-2: #ebe8f2;
+    --ink: #211f33;
+    --ink-2: #5b5674;
+    --muted: #8b86a3;
+    --line: #ddd8e8;
+    --accent: #6b4fa8;
+    --accent-soft: #efe9fa;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme='light']) {
+      --ground: #17172a;
+      --surface: #21213a;
+      --surface-2: #2b2b4a;
+      --ink: #eceaf6;
+      --ink-2: #b0abc9;
+      --muted: #7d789a;
+      --line: #34345a;
+      --accent: #c3aef0;
+      --accent-soft: #2a2748;
+    }
+  }
+  :root[data-theme='dark'] {
+    --ground: #17172a;
+    --surface: #21213a;
+    --surface-2: #2b2b4a;
+    --ink: #eceaf6;
+    --ink-2: #b0abc9;
+    --muted: #7d789a;
+    --line: #34345a;
+    --accent: #c3aef0;
+    --accent-soft: #2a2748;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--ground);
+    color: var(--ink);
+    font-family: 'Be Vietnam Pro', system-ui, sans-serif;
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 56px 24px 96px; }
+
+  header { max-width: 62ch; }
+  .eyebrow {
+    font-size: 12px; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--muted); font-weight: 600; margin: 0 0 14px;
+  }
+  h1 {
+    font-family: 'Fraunces', Georgia, serif; font-weight: 600;
+    font-size: clamp(34px, 5.5vw, 56px); line-height: 1.05;
+    margin: 0 0 18px; text-wrap: balance; letter-spacing: -.015em;
+  }
+  header p { color: var(--ink-2); margin: 0 0 12px; }
+  header p strong { color: var(--ink); font-weight: 600; }
+
+  h2 {
+    font-family: 'Fraunces', Georgia, serif; font-weight: 600;
+    font-size: 27px; margin: 0 0 8px; letter-spacing: -.01em;
+  }
+  h3 { font-size: 15px; margin: 0 0 8px; font-weight: 600; }
+
+  .themes { display: flex; flex-direction: column; gap: 28px; margin-top: 56px; }
+
+  .theme {
+    display: grid; grid-template-columns: 320px 1fr; gap: 36px;
+    background: var(--surface); border: 1px solid var(--line);
+    border-radius: 24px; padding: 32px;
+  }
+  @media (max-width: 860px) { .theme { grid-template-columns: 1fr; gap: 28px; } }
+
+  .theme-meta { min-width: 0; }
+  .time {
+    display: inline-block; font-size: 12px; font-weight: 600;
+    letter-spacing: .08em; padding: 5px 12px; border-radius: 999px;
+    background: var(--accent-soft); color: var(--accent); margin-bottom: 14px;
+    font-variant-numeric: tabular-nums;
+  }
+  .theme-meta > p { color: var(--ink-2); margin: 0 0 22px; max-width: 60ch; }
+
+  /* ── Dải màu, kiểu bảng màu tham chiếu ── */
+  .swatches { display: flex; flex-direction: column; gap: 3px; margin-bottom: 22px; }
+  .sw {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 11px 16px; border-radius: 7px; font-size: 12.5px; font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+  .sw span:last-child { opacity: .62; font-size: 11.5px; }
+
+  .notes { display: grid; grid-template-columns: repeat(auto-fit, minmax(215px, 1fr)); gap: 18px; }
+  .note { background: var(--surface-2); border-radius: 14px; padding: 16px 18px; }
+  .note p { margin: 0; font-size: 13.5px; color: var(--ink-2); line-height: 1.55; }
+
+  /* ── Khung điện thoại ── */
+  .phone {
+    width: 320px; height: 620px; border-radius: 36px; overflow: hidden;
+    position: relative; box-shadow: 0 18px 44px rgba(20, 16, 40, .3);
+    display: flex; flex-direction: column; padding: 26px 18px 18px;
+  }
+  @media (max-width: 860px) { .phone { width: 100%; max-width: 320px; } }
+
+  .stars { position: absolute; inset: 0; pointer-events: none; }
+  .moon {
+    position: absolute; top: 42px; right: 34px; width: 46px; height: 46px;
+    border-radius: 50%; background: #f6f0dc;
+    box-shadow: 0 0 26px 10px rgba(246, 240, 220, .28);
+  }
+  .moon::after {
+    content: ''; position: absolute; top: -7px; right: -13px;
+    width: 46px; height: 46px; border-radius: 50%; background: #24213f;
+  }
+
+  /* ── Mặt trời & mây ──
+     Mây vẽ bằng box-shadow nhiều lớp rồi làm mờ: gọn hơn hẳn so với SVG path,
+     và blur cho ra rìa mềm đúng chất pastel. `color` quyết định sắc mây. */
+  .mat-troi { position: absolute; border-radius: 50%; }
+  .may {
+    position: absolute; width: 46px; height: 46px; border-radius: 50%;
+    background: currentColor; filter: blur(7px); opacity: .85;
+    box-shadow:
+      26px 7px 0 -5px currentColor,
+      54px 1px 0 -9px currentColor,
+      -19px 9px 0 -7px currentColor;
+  }
+  /* Dải mù chân trời — thứ làm cho mặt trời "lặn nửa" đọc ra là lặn,
+     chứ không phải một hình tròn bị cắt ngẫu nhiên. */
+  .chan-troi { position: absolute; left: 0; right: 0; }
+
+  .p-title { font-family: 'Fraunces', Georgia, serif; font-size: 20px; position: relative; }
+  .card { border-radius: 18px; padding: 17px; margin-top: 16px; position: relative; }
+  .lbl { font-size: 12px; }
+  .big {
+    font-size: 38px; font-weight: 600; letter-spacing: -.025em;
+    margin-top: 3px; font-variant-numeric: tabular-nums;
+  }
+  .sub { font-size: 12px; margin-top: 6px; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-top: 9px; }
+  .row2 .card { margin-top: 0; padding: 13px; }
+  .mid { font-size: 17px; font-weight: 600; margin-top: 2px; font-variant-numeric: tabular-nums; }
+  .cats { display: flex; gap: 6px; margin-top: 14px; position: relative; }
+  .cat { flex: 1; height: 32px; border-radius: 9px; }
+  .cta {
+    margin-top: auto; border-radius: 16px; padding: 14px;
+    text-align: center; font-weight: 600; font-size: 15px; position: relative;
+  }
+
+  /* ── Bình minh ── */
+  .binh-minh { background: linear-gradient(168deg, #cfe0f7 0%, #ddd9f2 42%, #f6dfe4 74%, #fdeadd 100%); }
+  .binh-minh .p-title, .binh-minh .big, .binh-minh .mid { color: #24304a; }
+  .binh-minh .card { background: rgba(253, 250, 247, .9); }
+  .binh-minh .lbl, .binh-minh .sub { color: #5a6480; }
+  .binh-minh .cta { background: #3b8841; color: #fdfaf7; }
+
+  /* ── Hoàng hôn ── */
+  .hoang-hon { background: linear-gradient(168deg, #f9dcc6 0%, #f7cdd0 38%, #e8c6de 70%, #d3c2e6 100%); }
+  .hoang-hon .p-title, .hoang-hon .big, .hoang-hon .mid { color: #3a2436; }
+  .hoang-hon .card { background: rgba(255, 248, 243, .9); }
+  .hoang-hon .lbl, .hoang-hon .sub { color: #6d5566; }
+  .hoang-hon .cta { background: #b4562a; color: #fff8f3; }
+
+  /* ── Ngân hà ── */
+  .ngan-ha { background: linear-gradient(168deg, #171730 0%, #262045 40%, #3a2b50 72%, #4a3355 100%); }
+  .ngan-ha .p-title, .ngan-ha .big, .ngan-ha .mid { color: #ece9f5; }
+  .ngan-ha .card { background: rgba(46, 43, 74, .74); border: 1px solid rgba(180, 172, 220, .16); }
+  .ngan-ha .lbl, .ngan-ha .sub { color: #b3aecb; }
+  .ngan-ha .cta { background: #9d8ede; color: #1b1832; }
+
+  .callout {
+    margin-top: 56px; border-radius: 24px; padding: 34px;
+    background: var(--surface); border: 1px solid var(--line);
+    border-left: 4px solid var(--accent);
+  }
+  .callout ul { margin: 16px 0 0; padding-left: 20px; color: var(--ink-2); }
+  .callout li { margin-bottom: 11px; }
+  .callout strong { color: var(--ink); }
+  .callout p { color: var(--ink-2); margin: 0; max-width: 68ch; }
+
+  table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 14px; }
+  th, td { text-align: left; padding: 11px 14px; border-bottom: 1px solid var(--line); }
+  th { font-size: 11.5px; text-transform: uppercase; letter-spacing: .09em; color: var(--muted); }
+  td:first-child { font-weight: 600; white-space: nowrap; }
+  td { color: var(--ink-2); }
+  .scroll { overflow-x: auto; }
+</style>
+</head>
+<body>
+
+
+<div class="wrap">
+
+  <header>
+    <p class="eyebrow">Đề xuất thị giác · chưa áp dụng vào dự án</p>
+    <h1>Ba bầu trời</h1>
+    <p>
+      Nền app đổi theo giờ trong ngày, theo giờ Việt Nam — cùng cơ chế
+      <strong>homNay()</strong> đã dùng cho ranh giới chu kỳ, nên không phát sinh khái niệm mới.
+    </p>
+    <p>
+      Ba mốc giờ dưới đây là đề xuất, và nên nằm trong bảng <strong>cau_hinh</strong> theo §14
+      quy ước 5 để đổi được mà không cần deploy lại.
+    </p>
+  </header>
+
+  <div class="themes">
+
+    <!-- ── BÌNH MINH ── -->
+    <section class="theme">
+      <div class="phone binh-minh">
+        <!-- Mặt trời đã lên khá cao và còn NHẠT: sáng sớm ánh nắng chưa gắt,
+             nên dùng vàng kem thay vì vàng bão hoà, quầng sáng rộng mà mỏng. -->
+        <div
+          class="mat-troi"
+          style="
+            top: 78px; right: 46px; width: 54px; height: 54px;
+            background: radial-gradient(circle at 38% 34%, #fffdf4 0%, #ffeec9 52%, #fbdca6 100%);
+            box-shadow: 0 0 34px 16px rgba(255, 240, 205, 0.5), 0 0 78px 40px rgba(255, 236, 196, 0.24);
+          "
+          aria-hidden="true"
+        ></div>
+        <div class="may" style="top: 150px; left: -14px; color: #f3e6f3; opacity: 0.7" aria-hidden="true"></div>
+        <div class="may" style="top: 116px; right: -8px; color: #eee3f4; opacity: 0.52; transform: scale(0.72)" aria-hidden="true"></div>
+        <div class="may" style="top: 300px; left: 34px; color: #fbe4e2; opacity: 0.46; transform: scale(1.25)" aria-hidden="true"></div>
+
+        <div class="p-title">Sổ của Bồ</div>
+        <div class="card">
+          <div class="lbl">Hôm nay còn tiêu được</div>
+          <div class="big">563.636đ</div>
+          <div class="sub">Đã dùng 0% ngân sách, còn 11 ngày</div>
+        </div>
+        <div class="row2">
+          <div class="card">
+            <div class="lbl">Đã chi</div>
+            <div class="mid">0đ</div>
+          </div>
+          <div class="card">
+            <div class="lbl">Lương</div>
+            <div class="mid">9.000.000đ</div>
+          </div>
+        </div>
+        <div class="cats">
+          <div class="cat" style="background:#3b8841"></div>
+          <div class="cat" style="background:#835cbe"></div>
+          <div class="cat" style="background:#c65d26"></div>
+          <div class="cat" style="background:#008b9e"></div>
+          <div class="cat" style="background:#c75374"></div>
+          <div class="cat" style="background:#b59600"></div>
+        </div>
+        <div class="cta">Ghi một khoản</div>
+      </div>
+
+      <div class="theme-meta">
+        <span class="time">05:00 – 10:59</span>
+        <h2>Bình minh</h2>
+        <p>
+          Xanh sớm chuyển dần sang hồng phấn rồi kem ấm. Đây là khung giờ bồ mở app để ghi cà phê
+          hay bữa sáng, nên nền giữ độ sáng cao và chữ vẫn là mực xanh đậm.
+        </p>
+
+        <div class="swatches">
+          <div class="sw" style="background:#cfe0f7;color:#24304a"><span>Xanh sớm</span><span>#cfe0f7</span></div>
+          <div class="sw" style="background:#ddd9f2;color:#24304a"><span>Tím sương</span><span>#ddd9f2</span></div>
+          <div class="sw" style="background:#f6dfe4;color:#3a2436"><span>Hồng phấn</span><span>#f6dfe4</span></div>
+          <div class="sw" style="background:#fdeadd;color:#3a2436"><span>Kem ấm</span><span>#fdeadd</span></div>
+          <div class="sw" style="background:#fdfaf7;color:#24304a"><span>Mặt thẻ</span><span>#fdfaf7</span></div>
+          <div class="sw" style="background:#24304a;color:#dbe6f6"><span>Chữ chính</span><span>#24304a</span></div>
+        </div>
+
+        <div class="notes">
+          <div class="note">
+            <h3>Vì sao thẻ vẫn gần như đục</h3>
+            <p>
+              Sáu màu danh mục đã kiểm định trên nền kem. Thẻ trong suốt sẽ đổi nền dưới chân
+              chúng và làm kiểm định đó hết hiệu lực.
+            </p>
+          </div>
+          <div class="note">
+            <h3>Chữ chính đổi màu</h3>
+            <p>
+              Than ấm #20241f trên nền xanh lơ trông xỉn. Mực xanh #24304a cùng họ với nền nên
+              đọc êm hơn và vẫn thừa tương phản.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── HOÀNG HÔN ── -->
+    <section class="theme">
+      <div class="phone hoang-hon">
+        <!-- Mặt trời lặn nửa: tâm đặt ĐÚNG trên dải mù chân trời, nửa dưới bị dải
+             đó phủ. Màu bão hoà hơn bình minh vì nắng chiều đỏ hơn, quầng sáng
+             hẹp và đậm hơn — càng gần chân trời thì ánh càng gom lại. -->
+        <div class="may" style="top: 96px; left: -18px; color: #f7c9b4; opacity: 0.62; transform: scale(1.1)" aria-hidden="true"></div>
+        <div class="may" style="top: 62px; right: -22px; color: #f3bcc4; opacity: 0.5; transform: scale(0.8)" aria-hidden="true"></div>
+        <div
+          class="mat-troi"
+          style="
+            top: 372px; right: 60px; width: 76px; height: 76px;
+            background: radial-gradient(circle at 44% 40%, #fff6e2 0%, #ffd79a 46%, #f7a874 100%);
+            box-shadow: 0 0 40px 14px rgba(255, 196, 138, 0.55), 0 0 96px 44px rgba(248, 168, 122, 0.26);
+          "
+          aria-hidden="true"
+        ></div>
+        <!-- Dải mù phủ nửa dưới mặt trời. Chính nó biến "hình tròn bị cắt" thành
+             "mặt trời đang lặn". -->
+        <div
+          class="chan-troi"
+          style="
+            top: 410px; height: 210px;
+            background: linear-gradient(180deg, rgba(240, 190, 178, 0) 0%, rgba(238, 186, 186, 0.82) 16%, rgba(226, 190, 216, 0.94) 48%, rgba(211, 194, 230, 1) 100%);
+          "
+          aria-hidden="true"
+        ></div>
+        <!-- Mây thấp nằm TRƯỚC dải mù, bắt ánh từ dưới lên — vẽ sau chan-troi
+             trong DOM nên nó phủ lên, đọc ra là mây tiền cảnh. -->
+        <div class="may" style="top: 392px; left: 6px; color: #f0c0c4; opacity: 0.6; transform: scale(0.95)" aria-hidden="true"></div>
+
+        <div class="p-title">Sổ của Bồ</div>
+        <div class="card">
+          <div class="lbl">Hôm nay còn tiêu được</div>
+          <div class="big">563.636đ</div>
+          <div class="sub">Đã dùng 0% ngân sách, còn 11 ngày</div>
+        </div>
+        <div class="row2">
+          <div class="card">
+            <div class="lbl">Đã chi</div>
+            <div class="mid">0đ</div>
+          </div>
+          <div class="card">
+            <div class="lbl">Lương</div>
+            <div class="mid">9.000.000đ</div>
+          </div>
+        </div>
+        <div class="cats">
+          <div class="cat" style="background:#3b8841"></div>
+          <div class="cat" style="background:#835cbe"></div>
+          <div class="cat" style="background:#c65d26"></div>
+          <div class="cat" style="background:#008b9e"></div>
+          <div class="cat" style="background:#c75374"></div>
+          <div class="cat" style="background:#b59600"></div>
+        </div>
+        <div class="cta">Ghi một khoản</div>
+      </div>
+
+      <div class="theme-meta">
+        <span class="time">11:00 – 17:59</span>
+        <h2>Hoàng hôn</h2>
+        <p>
+          Mơ chín xuống hồng đào rồi tím khói. Đây là khung giờ dùng nhiều nhất — bữa trưa, cà phê
+          chiều, đi chợ về — nên nền ấm nhưng vẫn nhạt để con số lớn không bị nền cạnh tranh.
+        </p>
+
+        <div class="swatches">
+          <div class="sw" style="background:#f9dcc6;color:#3a2436"><span>Mơ chín</span><span>#f9dcc6</span></div>
+          <div class="sw" style="background:#f7cdd0;color:#3a2436"><span>Hồng đào</span><span>#f7cdd0</span></div>
+          <div class="sw" style="background:#e8c6de;color:#3a2436"><span>Tím khói</span><span>#e8c6de</span></div>
+          <div class="sw" style="background:#d3c2e6;color:#3a2436"><span>Oải hương chiều</span><span>#d3c2e6</span></div>
+          <div class="sw" style="background:#fff8f3;color:#3a2436"><span>Mặt thẻ</span><span>#fff8f3</span></div>
+          <div class="sw" style="background:#3a2436;color:#f7cdd0"><span>Chữ chính</span><span>#3a2436</span></div>
+        </div>
+
+        <div class="notes">
+          <div class="note">
+            <h3>Nút chính đổi màu</h3>
+            <p>
+              Xanh lá #3b8841 đặt trên nền hồng cam là cặp bổ túc, nhìn chói. Đổi sang đất nung
+              #b4562a — cùng họ ấm với nền, vẫn nổi.
+            </p>
+          </div>
+          <div class="note">
+            <h3>Chỗ cần cẩn thận</h3>
+            <p>
+              Danh mục Giải trí cũng là đất nung. Ở khung giờ này nút chính và ô màu Giải trí sẽ
+              hơi giống nhau — cần kiểm lại trước khi chốt.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── NGÂN HÀ ── -->
+    <section class="theme">
+      <div class="phone ngan-ha">
+        <canvas class="stars" width="320" height="620" aria-hidden="true"></canvas>
+        <div class="moon" aria-hidden="true"></div>
+        <div class="p-title">Sổ của Bồ</div>
+        <div class="card">
+          <div class="lbl">Hôm nay còn tiêu được</div>
+          <div class="big">563.636đ</div>
+          <div class="sub">Đã dùng 0% ngân sách, còn 11 ngày</div>
+        </div>
+        <div class="row2">
+          <div class="card">
+            <div class="lbl">Đã chi</div>
+            <div class="mid">0đ</div>
+          </div>
+          <div class="card">
+            <div class="lbl">Lương</div>
+            <div class="mid">9.000.000đ</div>
+          </div>
+        </div>
+        <div class="cats">
+          <div class="cat" style="background:#6fc47a"></div>
+          <div class="cat" style="background:#b79ae8"></div>
+          <div class="cat" style="background:#e59263"></div>
+          <div class="cat" style="background:#57c2d4"></div>
+          <div class="cat" style="background:#e88aa6"></div>
+          <div class="cat" style="background:#d8bd4a"></div>
+        </div>
+        <div class="cta">Ghi một khoản</div>
+      </div>
+
+      <div class="theme-meta">
+        <span class="time">18:00 – 04:59</span>
+        <h2>Ngân hà</h2>
+        <p>
+          Mực đêm lên chàm rồi tím than, có sao và trăng khuyết. Đây là khung giờ bồ tổng kết
+          ngày trên giường, nên nền tối để không chói mắt trong phòng đã tắt đèn.
+        </p>
+
+        <div class="swatches">
+          <div class="sw" style="background:#171730;color:#ece9f5"><span>Mực đêm</span><span>#171730</span></div>
+          <div class="sw" style="background:#262045;color:#ece9f5"><span>Chàm</span><span>#262045</span></div>
+          <div class="sw" style="background:#3a2b50;color:#ece9f5"><span>Tím than</span><span>#3a2b50</span></div>
+          <div class="sw" style="background:#4a3355;color:#ece9f5"><span>Tím hoàng hôn muộn</span><span>#4a3355</span></div>
+          <div class="sw" style="background:#2e2b4a;color:#ece9f5"><span>Mặt thẻ</span><span>#2e2b4a</span></div>
+          <div class="sw" style="background:#ece9f5;color:#171730"><span>Chữ chính</span><span>#ece9f5</span></div>
+        </div>
+
+        <div class="notes">
+          <div class="note">
+            <h3>Sáu màu danh mục phải làm lại</h3>
+            <p>
+              Bộ màu hiện tại kiểm định trên nền kem. Trên nền tối chúng tối quá và mất tương
+              phản — dải màu trong mockup này là bản đã nâng sáng, chưa kiểm định.
+            </p>
+          </div>
+          <div class="note">
+            <h3>Đây là một theme thứ hai</h3>
+            <p>
+              Không phải đổi ảnh nền: mọi token lớp 1 lẫn lớp 2 đều phải có bản tối, và kiểm định
+              ΔE mù màu phải chạy lại trên nền mới.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <div class="callout">
+    <h2>Trước khi chốt, ba việc</h2>
+    <p>
+      Nền đổi theo giờ không phải chuyện thay ảnh — nó chạm vào đúng phần §11.1 đã bỏ công kiểm
+      định. Ba việc dưới đây quyết định chi phí thật của tính năng này.
+    </p>
+
+    <ul>
+      <li>
+        <strong>Bình minh và Hoàng hôn thì rẻ.</strong> Chữ và thẻ vẫn sáng, sáu màu danh mục giữ
+        nguyên nền kem nên kiểm định cũ còn hiệu lực. Chỉ cần thêm token nền và đổi màu nút chính
+        ở khung hoàng hôn.
+      </li>
+      <li>
+        <strong>Ngân hà là một theme đầy đủ.</strong> Cần bản tối cho toàn bộ token lớp 1, một bộ
+        sáu màu danh mục mới, và chạy lại kiểm định tương phản ≥5:1 lẫn ΔE mù màu ≥8 trên nền tối.
+        Đây là phần tốn công nhất, và bỏ qua kiểm định thì mất luôn thứ §11.1 đã đánh đổi để có.
+      </li>
+      <li>
+        <strong>Chuyển cảnh phải êm.</strong> Bồ mở app lúc 17:58 rồi lúc 18:01 mà nền nhảy phát
+        một thì trông như app lỗi. Nên chuyển dần trong khoảng 30 phút giữa hai khung, hoặc chỉ
+        đổi khi mở app chứ không đổi giữa lúc đang dùng.
+      </li>
+    </ul>
+
+    <div class="scroll">
+      <table>
+        <thead>
+          <tr><th>Việc</th><th>Ước lượng</th><th>Ghi chú</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Token nền 3 khung giờ</td>
+            <td>1–2 giờ</td>
+            <td>Thêm vào <code>mau.ts</code> và <code>index.css</code>, test chống lệch đã có sẵn</td>
+          </tr>
+          <tr>
+            <td>Chọn theme theo giờ VN</td>
+            <td>1 giờ</td>
+            <td>Dùng lại logic UTC+7 của <code>homNay()</code>, mốc giờ để trong <code>cau_hinh</code></td>
+          </tr>
+          <tr>
+            <td>Bộ màu danh mục cho nền tối</td>
+            <td>3–4 giờ</td>
+            <td>Gồm chạy lại kiểm định tương phản và ΔE mù màu</td>
+          </tr>
+          <tr>
+            <td>Chuyển cảnh mềm</td>
+            <td>1 giờ</td>
+            <td>CSS transition trên biến màu, tôn trọng <code>prefers-reduced-motion</code></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // Sao vẽ bằng canvas thay vì hàng chục thẻ div — nhẹ hơn và phân bố tự nhiên hơn.
+  // Toạ độ cố định theo một bộ sinh số giả ngẫu nhiên để mỗi lần mở trang sao nằm y chỗ cũ.
+  for (const cv of document.querySelectorAll('canvas.stars')) {
+    const ctx = cv.getContext('2d')
+    let hat = 20260821
+    const ngau = () => {
+      hat = (hat * 1103515245 + 12345) % 2147483648
+      return hat / 2147483648
+    }
+    for (let i = 0; i < 130; i++) {
+      const x = ngau() * cv.width
+      const y = ngau() * cv.height * 0.68
+      const r = ngau() * 1.1 + 0.25
+      ctx.globalAlpha = 0.22 + ngau() * 0.66
+      ctx.fillStyle = ngau() > 0.82 ? '#d9c8f2' : '#f2eefc'
+      ctx.beginPath()
+      ctx.arc(x, y, r, 0, Math.PI * 2)
+      ctx.fill()
+    }
+  }
+</script>
+
+</body>
+</html>
